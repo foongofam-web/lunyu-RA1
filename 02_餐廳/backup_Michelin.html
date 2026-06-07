@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🍜 Michelin 餐廳指南</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; overscroll-behavior: none; }
+
+/* Header */
+.hdr { background: linear-gradient(135deg, #dc2626, #b91c1c); padding: 18px 16px 14px; text-align: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+.hdr h1 { font-size: 26px; color: #fff; letter-spacing: 1px; }
+.hdr p { font-size: 14px; color: #fca5a5; margin-top: 4px; }
+
+/* Tab Bar */
+.tabbar { display: flex; background: #1e293b; border-bottom: 1px solid #334155; position: sticky; top: 90px; z-index: 99; overflow-x: auto; scrollbar-width: none; }
+.tabbar::-webkit-scrollbar { display: none; }
+.tab { flex: 1; min-width: 80px; padding: 14px 8px; text-align: center; font-size: 15px; color: #94a3b8; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; white-space: nowrap; }
+.tab.active { color: #f87171; border-bottom-color: #dc2626; font-weight: bold; }
+
+/* Content */
+.page { display: none; padding: 16px; padding-bottom: 40px; }
+.page.active { display: block; }
+
+/* City Section */
+.city-hdr { background: linear-gradient(135deg, #1e40af, #1d4ed8); border-radius: 16px; padding: 16px 18px; margin-bottom: 14px; }
+.city-hdr h2 { font-size: 22px; color: #fff; }
+.city-hdr p { font-size: 14px; color: #bfdbfe; margin-top: 4px; }
+
+/* Restaurant Card */
+.rcard { background: #1e293b; border-radius: 16px; margin-bottom: 14px; overflow: hidden; border: 1px solid #334155; }
+.rcard-top { padding: 16px; }
+.rtop { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+.rname { font-size: 20px; font-weight: bold; color: #f8fafc; line-height: 1.3; }
+.rname-en { font-size: 14px; color: #94a3b8; margin-top: 3px; }
+.rstar { background: #dc2626; color: #fff; font-size: 13px; padding: 4px 10px; border-radius: 20px; white-space: nowrap; }
+.rstar.bourdain { background: #f59e0b; }
+.rstar.local { background: #10b981; }
+.rstar.hidden { background: #8b5cf6; }
+.rspec { font-size: 16px; color: #fbbf24; margin-bottom: 8px; }
+.rtags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.rtag { background: #334155; color: #c4b5fd; font-size: 12px; padding: 4px 10px; border-radius: 20px; }
+.rdesc { font-size: 15px; color: #94a3b8; line-height: 1.5; margin-bottom: 10px; }
+.rfooter { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid #334155; }
+.rbtn { flex: 1; text-align: center; background: #334155; color: #e2e8f0; font-size: 15px; padding: 12px; border-radius: 10px; text-decoration: none; display: block; }
+.rbtn.map { background: #16a34a; color: #fff; }
+.rbtn.pri { background: #dc2626; color: #fff; }
+
+/* Legend Page */
+.litem { background: #1e293b; border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; border-left: 4px solid; }
+.ltag { font-size: 18px; font-weight: bold; margin-bottom: 4px; }
+.ldesc { font-size: 15px; color: #94a3b8; }
+
+/* Hotels page */
+.hcard { background: #1e293b; border-radius: 14px; padding: 16px; margin-bottom: 12px; border: 1px solid #334155; }
+.hname { font-size: 20px; font-weight: bold; color: #f8fafc; margin-bottom: 4px; }
+.hcity { font-size: 15px; color: #60a5fa; margin-bottom: 8px; }
+.hdate { font-size: 14px; color: #94a3b8; margin-bottom: 6px; }
+.hbtn { display: inline-block; background: #16a34a; color: #fff; font-size: 15px; padding: 10px 18px; border-radius: 10px; text-decoration: none; margin-top: 8px; }
+
+/* Flights page */
+.fcard { background: #1e293b; border-radius: 14px; padding: 16px; margin-bottom: 12px; border-left: 4px solid #dc2626; }
+.fairline { font-size: 15px; color: #60a5fa; margin-bottom: 4px; }
+.fflight { font-size: 22px; font-weight: bold; color: #f8fafc; margin-bottom: 4px; }
+.froute { font-size: 16px; color: #94a3b8; margin-bottom: 4px; }
+.fdate { font-size: 14px; color: #fca5a5; }
+
+/* Tips */
+.tip-card { background: #1e293b; border-radius: 14px; padding: 16px; margin-bottom: 12px; border: 1px solid #334155; }
+.tip-title { font-size: 18px; color: #f87171; margin-bottom: 8px; }
+.tip-text { font-size: 16px; color: #cbd5e1; line-height: 1.6; }
+
+/* Section title */
+.sect-title { font-size: 13px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin: 20px 0 10px 4px; }
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <h1>🍜 Michelin 餐廳指南</h1>
+  <p>越南 · 台灣 | 4城市 22間餐廳</p>
+</div>
+
+<div class="tabbar">
+  <div class="tab active" onclick="switchTab('hcmc')">胡志明市</div>
+  <div class="tab" onclick="switchTab('nhatrang')">芽莊</div>
+  <div class="tab" onclick="switchTab('dalat')">大叻</div>
+  <div class="tab" onclick="switchTab('taiwan')">台灣</div>
+  <div class="tab" onclick="switchTab('info')">說明</div>
+</div>
+
+<!-- HCMC -->
+<div class="page active" id="pg-hcmc">
+  <div class="city-hdr"><h2>📍 胡志明市</h2><p>Sherwood Residence</p></div>
+
+  <div class="rcard">
+    <div class="rcard-top">
+      <div class="rtop">
+        <div><div class="rname">安安西貢 Ănăn Saigon</div><div class="rname-en">Modern Vietnamese Fusion</div></div>
+        <div class="rstar">⭐ 米其林一星</div>
+      </div>
+      <div class="rspec">🥇 Chef Peter Cuong Franklin 創新越南料理</div>
+      <div class="rtags"><span class="rtag">#米其林</span><span class="rtag">#fine-dining</span><span class="rtag">#fusion</span></div>
+      <div class="rdesc">Michelin One Star。將越南美食與法式烹飪技術結合，現代越南融合料理的先驅。</div>
+    </div>
+    <div class="rfooter">
+      <a class="rbtn map" href="https://www.google.com/maps/search/?api=1&query=An+An+Saigon+Ho+Chi+Minh" target="_blank">📍 地圖</a>
+      <a class="rbtn pri" href="https://guide.michelin.com/vn/en/ho-chi-minh/restaurant/anan-saigon" target="_blank">⭐ 官網</a>
+    </div>
+  </div>
+
+  <div class="rcard">
+    <div class="rcard-top">
+      <div class="rtop">
+        <div><div class="rname">街頭淑女 The Lunch Lady</div><div class="rname-en">Bun bo Hue & Daily Menu</div></div>
+        <div class="rstar bourdain">👨‍🍳 Bourdain</div>
+      </div>
+      <div class="rspec">🔥 傳奇街頭美食 · 每日限量100人</div>
+      <div class="rtags"><span class="rtag">#Bourdain</span><span class="rtag">#legendary</span><span class="rtag">#street-food</span></div>
+      <div class="rdesc">Anthony Bourdain 發掘的傳奇餐車。每天更換菜單，Bún bò Huế 被譽為「神級美味」。</div>
+    </div>
+    <div class="rfooter">
+      <a class="rbtn map" href="https://www.google.com/maps/search/?api=1&query=The+Lunch+Lady+Ho+Chi+Minh" target="_blank">📍 地圖</a>
+    </div>
+  </div>
+
+  <div class="rcard">
+    <div class="rcard-top">
+      <div class="rtop">
+        <div><div class="rname">輕燈餐廳 Nén Light</div><div class="rname-en">Contemporary Tasting Menu</div></div>
+        <div class="rstar">🌟 米其林推薦</div>
+      </div>
+      <div class="rspec">🥂 沉浸式品嚐菜單 · 越南當地食材</div>
+      <div class="rtags"><span class="rtag">#米其林</span><span class="rtag">#tasting</span><span class="rtag">#immersive</span></div>
+      <div class="rdesc">米其林推薦的當代餐廳，提供沉浸式品嚐菜單，使用越南各地頂級食材。</div>
+    </div>
+    <div class="rfooter">
+      <a class="rbtn map" href="https://www.google.com/maps/search/?api=1&query=Nen+Light+Ho+Chi+Minh" target="_blank">📍 地圖</a>
+    </div>
+  </div>
+
+  <div class="rcard">
+    <div class="rcard-top">
+      <div class="rtop">
+        <div><div class="rname">波萊河粉 Phở Lê</div><div class="rname-en">Pho Thap Cam (Mixed Beef)</div></div>
+        <div class="rstar local">🔥 越南第一</div>
+      </div>
+      <div class="rspec">🍜 南部風格甜湯底 · 專家評選越南最佳</div>
+      <div class="rtags"><span class="rtag">#本地推薦</span><span class="rtag">#pho</span><span class="rtag">#authentic</span></div>
+      <div class="rdesc">被專家評為越南最好吃的河粉。混合牛肉、配料豐富，南部甜湯底風味獨特。</div>
+    </div>
+    <div class="rfooter">
+      <a class="rbtn map" href="https://www.google.com/maps/search/?api=1&query=Pho+Le+Ho+Chi+Minh" target="_blank">📍 地圖</a>
+    </div>
+  </div>
+
+  <div class="rcard">
+    <div class="rcard-top">
+      <div class="rtop">
+        <div><div class="rname">輝好法棍 Banh Mi Huynh Hoa</div><div class="rname-en">Loaded Banh Mi</div></div>
+        <div class="rstar local">⭐ 本地最愛</div>
+      </div>
+      <div class="rspec">🥖 滿料法棍 · 厚切肉派 + 肉鬆</div>
+      <div class="rtags"><span class="rtag">#本地推薦</span><span class="rtag">#banh-mi</span><span class="rtag">#loaded</span></div>
+      <div class="rdesc">料最多的越南法棍。厚厚肉派、配上甜肉鬆，每口都超豐富。</div>
+    </div>
+    <div class="rfooter">
+      <a class="rbtn map" href="https://www.google.com/maps/search/?api=1&query=Banh+Mi+Huynh+Hoa+Ho+Chi+Minh" target="_blank">📍 地圖</a>
+    </div>
+  </div>
+
+  <div class="rcard">
+    <div class="rcard-top">
+      <div class="rtop">
+        <div><div class="rname">西貢砂鍋飯 Cơm Niêu Sài Gòn</div><div class="rname-en">Flying Rice & Clay Pot</div></div>
+        <div class="rstar bourdain">👨‍🍳 Bourdain</div>
+      </div>
+      <div class="rspec">🍚 敲砂鍋上菜 · 戲劇性呈現</div>
+      <div class="rtags"><span class="rtag">#Bourdain</span><span class="rtag">#theatrical</span><span class="rtag">#clay-pot</span></div>
+      <div class="rdesc">會表演敲砂鍋的知名餐廳。Bourdain 稱讚其戲劇性呈現和傳統越南美味。</div>
+    </div>
+    <div class="rfooter">
+      <a class="rbtn map" href="https://www.google.com/maps/search/?api=1&query=Com+Nieu+Sai+Gon+Ho+Chi+Minh" target="_blank">📍 地圖</a>
+    </div>
+  </div>
+
+  <div class="rcard">
+    <div class="rcard-top">
+      <div class="rtop">
+        <div><div class="rname">螺loan海鮮 Oc Loan</div><div class="rname-en">Seafood & Shellfish</div></div>
+        <div class="rstar">📍 National Geographic</div>
+      </div>
+      <div class="rspec">🦐 傳奇海鮮 · 前黑道老闆</div>
+      <div class="rtags"><span class="rtag">#海鮮</span><span class="rtag">#shellfish</span><span class="rtag">#local</span></div>
+      <div class="rdesc">有獨特故事的海鮮餐廳。老闆曾是「黑道」出身，料理手法創新獨特。</div>
+    </div>
+    <div class="rfooter">
+      <a class="rbtn map" href="https://www.google.com/maps/search/?api=1&query=Oc+Loan+Ho+Chi+Minh+seafood" target="_blank">📍 地圖</a>
+    </div>
+  </div>
+
+  <div class="rcard">
+    <div class="rcard-top">
+      <div class="rtop">
+        <div><div class="rname">秘密花園 Secret Garden</div><div class="rname-en">Home Cooking Vietnamese</div></div>
+        <div class="rstar hidden">🌿 隱藏版</div>
+      </div>
+      <div class="rspec">🏡 屋頂秘密花園 · 家庭式越南菜</div>
+      <div class="rtags"><span class="rtag">#隱藏餐廳</span><span class="rtag">#rooftop</span><span class="rtag">#home-cooking</span></div>
+      <div class="rdesc">藏在鬧區屋頂的秘密花園。家庭式越南家常菜，環境悠閒愜意。</div>
+    </div>
+    <div class="rfooter">
+      <a class="rbtn map" href="https://www.google.com/maps/search/?api=1&query=Secret+Garden+Ho+Chi+Minh+restaurant" target="_blank">📍 地圖</a>
+    </div>
+  </div>
+</div>
+
+<!-- NHA TRANG -->
+<div class="page" id="pg-nhatrang">
+  <div class="city-hdr"><h2>📍 芽莊 Nha Trang</h2><p>Sunrise Nha Trang Beach Hotel</p></div>
+
+  <div class="rcard">
+    <div class="rcard-top">
+      <div class="rtop">
+        <div><div class="rname">帆船俱樂部 Sailing Club</div><div class="rname-en">Seafood & International</div></div>
+        <div class="rstar">🌊 海濱</div>
+      </div>
+      <div class="rspec">🏖️ 海景第一排 · 現場音樂</div>
+      <div class="rtags"><span class="rtag">#海濱</span><span class="rtag">#seafood</span><span class="rtag">#international</span></div>
+      <div class="rdesc">芽莊地標級海濱餐廳酒吧，無敵海景，適合看日落和現場音樂表演。</div>
+    </div>
+    <div class="rfooter">
+      <a class="rbtn map" href="https://www.google.com/maps/search/?api=1&query=Sailing+Club+Nha+Trang" target="_blank">📍 地圖</a>
+    </div>
+  </div>
+
+  <div class="rcard">
+    <div class="rcard-top">
+      <div class="rtop">
+        <div><div class="rname">綠芽餐廳 Lạc Cân</div><div class="rname-en">BBQ Beef & Local Cuisine</div></div>
+        <div class="rstar local">🔥 炭烤</div>
+      </div>
+      <div class="rspec">🔥 炭火烤肉 · 大叻風味</div>
+      <div class="rtags"><span class="rtag">#燒烤</span><span class="rtag">#BBQ</span><span class="rtag">#beef</span></div>
+      <div class="rdesc">以炭火烤肉聞名，牛肉鮮嫩多汁，附有大叻高原特色料理。</div>
+    </div>
+    <div class="rfooter">
+      <a class="rbtn map" href="https://www.google.com/maps/search/?api=1&query=Lac+Canh+Restaurant+Nha+Trang" target="_blank">📍 地圖</a>
+    </div>
+  </div>
+
+  <div class="rcard">
+    <div class="rcard-top">
+      <div class="rtop">
+        <div><div class="rname">芽庄海鮮 Nha Trang Seafood</div><div class="rname-en">Fresh Seafood</div></div>
+        <div class="rstar">🦐 鮮撈</div>
+      </div>
+      <div class="rspec">🦐 當日海鮮 · 在地人氣</div>
+      <div class="rtags"><span class="rtag">#海鮮</span><span class="rtag">#fresh</span><span class="rtag">#local</span></div>
+      <div class="rdesc">在地人推薦的海鮮餐廳，食材當日鮮撈，價格實惠CP值高。</div>
+    </div>
+    <div class="rfooter">
+      <a class="rbtn map" href="https://www.google.com/maps/search/?api=1&query=Nha+Trang+Seafood+Restaurant" target="_blank">📍 地圖</a>
+    </div>
+  </div>
+
+  <div class="rcard">
+    <div class="rcard-top">
+      <div class="rtop">
+        <div><div class="rname">迎日海灘餐廳 Gianh Beach</div><div class="rname-en">Vietnamese Seafood</div></div>
+        <div class="rstar">🌅 海邊</div>
+      </div>
+      <div class="rspec">🌅 浪漫夕陽 · 新鮮海產</div>
+      <div class="rtags"><span class="rtag">#海濱</span><span class="rtag">#seafood</span><span class="rtag">#sunset</span></div>
+      <div class="rdesc">浪漫海邊餐廳，新鮮海產配夕陽，適合情侶或家庭聚餐。</div>
+    </div>
+    <div class="rfooter">
+      <a class="rbtn map" href="https://www.google.com/maps/search/?api=1&query=Gianh+Beach+Restaurant+Nha+Trang" target="_blank">📍 地圖</a>
+    </div>
+  </div>
+</div>
+
+<!-- DALAT -->
+<div class="page" id="pg-dalat">
+  <div class="city-hdr"><h2>📍 大叻 DaLat</h2><p>Swiss Belresort Tuyen Lam</p></div>
+
+  <div class="rcard">
+    <div class="rcard-top">
+      <div class="rtop">
+        <div><div class="rname">江湖海鮮 Gốc Hà Thanh</div><div class="rname-en">Vietnamese & Chinese Fusion</div></div>
+        <div class="rstar local">⭐ 在地最愛</div>
+      </div>
+      <div class="rspec">🍜 越式中菜 · 當地人氣</div>
+      <div class="rtags"><span class="rtag">#本地推薦</span><span class="rtag">#fusion</span><span class="rtag">#popular</span></div>
+      <div class="rdesc">大叻人氣餐廳，越式中菜融合做得很好，是當地人和觀光客都喜歡的選擇。</div>
+    </div>
+    <div class="rfooter">
+      <a class="rbtn map" href="https://www.google.com/maps/search/?api=1&query=Goc+Ha+Thanh+Dalat+restaurant" target="_blank">📍 地圖</a>
+    </div>
+  </div>
+
+  <div class="rcard">
+    <div class="rcard-top">
+      <div class="rtop">
+        <div><div class="rname">大館 Đà Quán</div><div class="rname-en">Traditional Dalat Cuisine</div></div>
+        <div class="rstar hidden">🌿 傳統</div>
+      </div>
+      <div class="rspec">🏡 大叻高原傳統料理 · 溫馨家庭風</div>
+      <div class="rtags"><span class="rtag">#傳統</span><span class="rtag">#local-cuisine</span><span class="rtag">#cozy</span></div>
+      <div class="rdesc">溫馨舒適的傳統大叻餐廳，高原特色料理，風味道地。</div>
+    </div>
+    <div class="rfooter">
+      <a class="rbtn map" href="https://www.google.com/maps/search/?api=1&query=Da+Quan+Dalat+restaurant" target="_blank">📍 地圖</a>
+    </div>
+  </div>
+
+  <div class="rcard">
+    <div class="rcard-top">
+      <div class="rtop">
+        <div><div class="rname">薰衣草餐廳 Lavender Dalat</div><div class="rname-en">Vietnamese & European</div></div>
+        <div class="rstar">🌸 咖啡廳</div>
+      </div>
+      <div class="rspec">☕ 越式+歐陸料理 · 悠閒氛圍</div>
+      <div class="rtags"><span class="rtag">#咖啡廳</span><span class="rtag">#european</span><span class="rtag">#cafe</span></div>
+      <div class="rdesc">充滿法式風情的餐廳咖啡廳，結合越南和歐陸料理，環境優雅。</div>
+    </div>
+    <div class="rfooter">
+      <a class="rbtn map" href="https://www.google.com/maps/search/?api=1&query=Lavender+Dalat+restaurant+cafe" target="_blank">📍 地圖</a>
+    </div>
+  </div>
+
+  <div class="rcard">
+    <div class="rcard-top">
+      <div class="rtop">
+        <div><div class="rname">大叻夜市 Dalat Night Market</div><div class="rname-en">Street Food & Night Market</div></div>
+        <div class="rstar">🌙 夜市</div>
+      </div>
+      <div class="rspec">🍢 街頭美食 · 便宜好吃</div>
+      <div class="rtags"><span class="rtag">#夜市</span><span class="rtag">#street-food</span><span class="rtag">#cheap</span></div>
+      <div class="rdesc">大叻夜市匯集各種街頭美食，越南小吃、燒烤、甜品應有盡有。</div>
+    </div>
+    <div class="rfooter">
+      <a class="rbtn map" href="https://www.google.com/maps/search/?api=1&query=Dalat+Night+Market+food" target="_blank">📍 地圖</a>
+    </div>
+  </div>
+</div>
+
+<!-- TAIWAN -->
+<div class="page" id="pg-taiwan">
+  <div class="city-hdr" style="background:linear-gradient(135deg,#b91c1c,#dc2626);"><h2>📍 台灣 Taiwan</h2><p>Grand Forward Hotel 板橋</p></div>
+
+  <div class="rcard">
+    <div class="rcard-top">
+      <div class="rtop">
+        <div><div class="rname">鼎泰豐 Din Tai Fung</div><div class="rname-en">Xiaolongbao & Shanghai</div></div>
+        <div class="rstar">⭐⭐ 米其林一星</div>
+      </div>
+      <div class="rspec">🥟 世界知名小籠包 · 必訪</div>
+      <div class="rtags"><span class="rtag">#米其林星</span><span class="rtag">#xiaolongbao</span><span class="rtag">#famous</span></div>
+      <div class="rdesc">世界知名小籠包專賣店，米其林一星。皮薄汁多，全球遊客必訪。</div>
+    </div>
+    <div class="rfooter">
+      <a class="rbtn map" href="https://www.google.com/maps/search/?api=1&query=Din+Tai+Fung+Taipei" target="_blank">📍 地圖</a>
+    </div>
+  </div>
+
+  <div class="rcard">
+    <div class="rcard-top">
+      <div class="rtop">
+        <div><div class="rname">頤宮 Le Palais</div><div class="rname-en">Imperial Chinese Cuisine</div></div>
+        <div class="rstar">⭐⭐⭐ 米其林三星</div>
+      </div>
+      <div class="rspec">👑 台灣最高中餐 · 皇帝級料理</div>
+      <div class="rtags"><span class="rtag">#米其林三星</span><span class="rtag">#chinese</span><span class="rtag">#fine-dining</span></div>
+      <div class="rdesc">米其林三星中餐廳，台灣最頂級的中式料理，皇宮級美食體驗。</div>
+    </div>
+    <div class="rfooter">
+      <a class="rbtn map" href="https://www.google.com/maps/search/?api=1&query=Le+Palais+Taipei+Michelin" target="_blank">📍 地圖</a>
+    </div>
+  </div>
+
+  <div class="rcard">
+    <div class="rcard-top">
+      <div class="rtop">
+        <div><div class="rname">慕舍 Mume</div><div class="rname-en">Contemporary Taiwanese</div></div>
+        <div class="rstar">⭐⭐ 米其林一星</div>
+      </div>
+      <div class="rspec">🌿 當代台灣料理 · 在地食材</div>
+      <div class="rtags"><span class="rtag">#米其林星</span><span class="rtag">#taiwanese</span><span class="rtag">#fine-dining</span></div>
+      <div class="rdesc">米其林一星當代台灣料理，使用在地食材，融合國際烹飪技法。</div>
+    </div>
+    <div class="rfooter">
+      <a class="rbtn map" href="https://www.google.com/maps/search/?api=1&query=Mume+restaurant+Taipei" target="_blank">📍 地圖</a>
+    </div>
+  </div>
+
+  <div class="rcard">
+    <div class="rcard-top">
+      <div class="rtop">
+        <div><div class="rname">欣葉台菜 Shin Yeh</div><div class="rname-en">Traditional Taiwanese</div></div>
+        <div class="rstar local">🌟 在地傳奇</div>
+      </div>
+      <div class="rspec">🥩 經典台菜 · 1970年代起家</div>
+      <div class="rtags"><span class="rtag">#台菜</span><span class="rtag">#traditional</span><span class="rtag">#local-legend</span></div>
+      <div class="rdesc">台北經典台菜餐廳，1970年代起家，傳統風味代代相傳。</div>
+    </div>
+    <div class="rfooter">
+      <a class="rbtn map" href="https://www.google.com/maps/search/?api=1&query=Shin+Yeh+restaurant+Taipei" target="_blank">📍 地圖</a>
+    </div>
+  </div>
+
+  <div class="rcard">
+    <div class="rcard-top">
+      <div class="rtop">
+        <div><div class="rname">沾美西餐 Jaian</div><div class="rname-en">Japanese Western Food</div></div>
+        <div class="rstar">🌟 歷史名店</div>
+      </div>
+      <div class="rspec">🥩 西式自助餐 · 1949年創始</div>
+      <div class="rtags"><span class="rtag">#西餐</span><span class="rtag">#historic</span><span class="rtag">#buffet</span></div>
+      <div class="rdesc">台北歷史悠久的西餐廳，自1949年營業至今，是老台北人的共同記憶。</div>
+    </div>
+    <div class="rfooter">
+      <a class="rbtn map" href="https://www.google.com/maps/search/?api=1&query=Jaian+restaurant+Taipei" target="_blank">📍 地圖</a>
+    </div>
+  </div>
+</div>
+
+<!-- INFO -->
+<div class="page" id="pg-info">
+  <div class="city-hdr" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);">
+    <h2>🏷️ 標籤說明</h2>
+    <p>各標籤代表的意義</p>
+  </div>
+
+  <div class="litem" style="border-color:#dc2626;">
+    <div class="ltag">⭐⭐⭐ 米其林三星</div>
+    <div class="ldesc">最高等級，米其林評審最高榮譽。全球最頂尖的餐廳。</div>
+  </div>
+
+  <div class="litem" style="border-color:#f59e0b;">
+    <div class="ltag">⭐⭐ 米其林一星</div>
+    <div class="ldesc">優質餐廳，廚藝出色，值得繞路前往品嚐。</div>
+  </div>
+
+  <div class="litem" style="border-color:#f59e0b;">
+    <div class="ltag">👨‍🍳 Bourdain 推薦</div>
+    <div class="ldesc">Anthony Bourdain 在節目中介紹的餐廳，美食界傳奇推介。</div>
+  </div>
+
+  <div class="litem" style="border-color:#10b981;">
+    <div class="ltag">🔥 本地最愛 / 在地傳奇</div>
+    <div class="ldesc">當地人最愛的餐廳，經過時間考驗的人氣名店。</div>
+  </div>
+
+  <div class="litem" style="border-color:#0ea5e9;">
+    <div class="ltag">🦐 海鮮 / 🌅 海濱</div>
+    <div class="ldesc">以新鮮海產或海邊氛圍為特色的餐廳。</div>
+  </div>
+
+  <div class="litem" style="border-color:#8b5cf6;">
+    <div class="ltag">🌙 夜市 / 🌿 隱藏版</div>
+    <div class="ldesc">夜市街頭美食，或較少觀光客知道的隱藏版美食。</div>
+  </div>
+
+  <div class="litem" style="border-color:#ec4899;">
+    <div class="ltag">🥩 台菜</div>
+    <div class="ldesc">傳統台式料理，呈現台灣在地飲食文化。</div>
+  </div>
+
+  <div class="litem" style="border-color:#f97316;">
+    <div class="ltag">☕ 咖啡廳</div>
+    <div class="ldesc">結合餐飲的咖啡廳，環境悠閒，適合休息。</div>
+  </div>
+
+  <div class="tip-card" style="margin-top:20px;">
+    <div class="tip-title">📝 備註</div>
+    <div class="tip-text">這些餐廳均為網上推薦的葷食餐廳，方便葷食朋友參考。素食者可至素食餐廳頁面查看。所有連結點擊後會用瀏覽器打開Google Maps。</div>
+  </div>
+
+  <div class="tip-card">
+    <div class="tip-title">💡 使用提示</div>
+    <div class="tip-text">• 長按餐廳名稱可複製<br>• 點擊「📍 地圖」直達 Google Maps<br>• 橫放手機可看更寬廣的列表</div>
+  </div>
+</div>
+
+<script>
+function switchTab(city) {
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+  document.getElementById('pg-'+city).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+
+</body>
+</html>

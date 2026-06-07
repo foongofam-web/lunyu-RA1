@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>出發咯 Let's Go!</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Microsoft JhengHei",sans-serif;background:#F0F4F8;color:#222;min-height:100vh;padding-bottom:70px}
+.cc{max-width:480px;margin:0 auto;background:#FFF;min-height:calc(100vh - 70px);box-shadow:0 0 20px rgba(0,0,0,.05)}
+.hdr{background:linear-gradient(135deg,#FF6B35,#FF8E53);color:#FFF;padding:16px 14px 14px;text-align:center}
+.hdr h1{font-size:22px;font-weight:800;letter-spacing:1px}
+.hdr .sub{font-size:12px;opacity:.9;margin-top:3px;font-weight:400}
+.hdr .langsw{font-size:11px;background:rgba(255,255,255,.25);border:none;border-radius:20px;padding:4px 12px;color:#FFF;cursor:pointer;margin-top:8px;font-weight:600}
+.hdr .langsw:active{background:rgba(255,255,255,.4)}
+.sw{background:#FFF;border-bottom:1px solid #EEE;padding:8px 14px;display:flex;gap:8px;align-items:center;font-size:12px}
+.sw label{cursor:pointer;padding:4px 10px;border-radius:20px;border:1.5px solid #DDD;font-weight:600;color:#666}
+.sw input{display:none}
+.sw input:checked+label{background:#FF6B35;color:#FFF;border-color:#FF6B35}
+.tb{display:flex;background:#FFF;border-bottom:2px solid #EEE;overflow-x:auto}
+.tb::-webkit-scrollbar{display:none}
+.tb .t{flex:0 0 auto;padding:11px 14px;font-size:12px;font-weight:600;color:#999;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
+.tb .t.act{color:#FF6B35;border-bottom-color:#FF6B35}
+.con{padding:12px 14px}
+.st{font-size:13px;font-weight:700;color:#FF6B35;margin:14px 0 6px;display:flex;align-items:center;gap:5px}
+.st:first-child{margin-top:0}
+.ec{background:linear-gradient(135deg,#C0392B,#E74C3C);color:#FFF;border-radius:14px;padding:13px;margin-bottom:12px}
+.ec .et{font-size:11px;font-weight:700;margin-bottom:6px;opacity:.9}
+.ec .er{display:flex;gap:6px;font-size:12px;margin-bottom:3px}
+.ec .el{font-weight:700;min-width:70px;opacity:.85}
+.dc{background:#FFF;border-radius:14px;margin-bottom:10px;box-shadow:0 2px 10px rgba(0,0,0,.06);overflow:hidden}
+.dh{background:#FF6B35;color:#FFF;padding:10px 13px;font-size:13px;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+.dh .ct{background:rgba(255,255,255,.25);padding:2px 9px;border-radius:20px;font-size:10px}
+.si{display:flex;padding:9px 13px;border-bottom:1px solid #F5F5F5;gap:8px;align-items:center;flex-wrap:wrap}
+.si:last-child{border-bottom:none}
+.tc{flex:0 0 46px;font-size:11px;font-weight:700;color:#FF6B35;padding-top:2px}
+.ac{flex:1;font-size:13px;line-height:1.5;min-width:100px}
+.bt{flex:0 0 auto;background:#FF6B35;color:#FFF;border:none;border-radius:7px;padding:5px 9px;font-size:11px;cursor:pointer;text-decoration:none;font-weight:600;text-align:center}
+.bt:active{background:#e55a25}
+.bt.map{background:#34A853}
+.bt.map:active{background:#2a8f47}
+.ic{background:#FFF;border-radius:12px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,.05);overflow:hidden}
+.ir{display:flex;align-items:center;padding:11px 13px;gap:10px;border-bottom:1px solid #F5F5F5}
+.ir:last-child{border-bottom:none}
+.ii{flex:0 0 36px;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.bf{background:#E3F2FD}.bh{background:#FFF8E1}.btag{background:#FCE4EC}.bv{background:#E8F5E9}
+.icn{flex:1}
+.icn .it{font-size:13px;font-weight:600}
+.icn .is{font-size:11px;color:#777;margin-top:2px;line-height:1.4}
+.rc{background:#FFF;border-radius:12px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,.05);padding:11px 13px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.ri{font-size:20px;flex:0 0 28px}
+.og{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.oi{background:#FFF;border-radius:12px;padding:14px 10px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.05);cursor:pointer;font-size:12px}
+.oi:active{transform:scale(.97)}
+.oi .em{font-size:28px;display:block;margin-bottom:4px}
+.oi .lb{font-weight:700;color:#FF6B35}
+.oi .sb{font-size:10px;color:#999;margin-top:2px}
+.cb{display:flex;align-items:center;padding:9px 13px;background:#FFF;border-radius:10px;margin-bottom:6px;gap:9px;font-size:13px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.cb .bx{width:20px;height:20px;border:2px solid #FF6B35;border-radius:6px;flex:0 0 20px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#FF6B35;font-weight:700}
+.cb.done{opacity:.45;text-decoration:line-through}
+.cb.done .bx{background:#FF6B35;color:#FFF;border-color:#FF6B35}
+.ph{background:#FFF;border-radius:14px;margin-bottom:10px;box-shadow:0 2px 10px rgba(0,0,0,.06);overflow:hidden}
+.phh{background:#FF6B35;color:#FFF;padding:9px 13px;font-size:13px;font-weight:700}
+.phs{display:flex;flex-wrap:wrap;gap:7px;padding:10px}
+.pbc{background:#FF6B35;color:#FFF;border:none;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer;flex:1;min-width:130px;text-align:center}
+.pbc:active{background:#e55a25}
+.pbc.playing{background:#34A853}
+.pbc.alt{background:#FFF;color:#FF6B35;border:1.5px solid #FF6B35}
+.pbc.alt:active{background:#FFF5F0}
+.pbc.alt.playing{background:#E8F5E9;color:#34A853;border-color:#34A853}
+.ct-pad{display:flex;gap:6px;flex-wrap:wrap;padding:4px 0 8px}
+.flb{background:#FFF8F5;padding:7px 13px;font-size:11px;color:#FF6B35;border-radius:8px;font-weight:600;cursor:pointer;border:none}
+.flb:active{background:#FFE8D5}
+.ft{text-align:center;padding:14px;font-size:10px;color:#AAA}
+/* Bottom Nav */
+.bnav{display:flex;position:fixed;bottom:0;left:0;right:0;background:#FFF;border-top:1px solid #EEE;z-index:200;max-width:480px;margin:0 auto}
+.bn{flex:1;display:flex;flex-direction:column;align-items:center;padding:7px 0 6px;cursor:pointer;border:none;background:#FFF;font-size:10px;color:#999;gap:2px}
+.bn:active{background:#F5F5F5}
+.bn.act{color:#FF6B35}
+.bn .be{font-size:20px;line-height:1}
+.bn.lbl{font-size:9px;font-weight:600;margin-top:1px}
+@keyframes fa{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.dc,.ic,.rc,.ph,.ec,.og{animation:fa .25s ease}
+</style>
+</head>
+<body>
+<div class="cc">
+<div class="hdr">
+<h1>✈️ <span class="zh">出發咯</span><span class="en">Let's Go!</span></h1>
+<div class="sub"><span class="zh">越南 + 台灣 旅遊攻略 2026</span><span class="en">Vietnam + Taiwan Travel 2026</span></div>
+<button class="langsw" onclick="toggleLang()">🌐 <span id="langLabel">EN</span></button>
+</div>
+<div class="sw">
+<input type="radio" id="swZH" name="lang" checked onchange="setLang('zh')">
+<label for="swZH">🇨🇳 中文</label>
+<input type="radio" id="swEN" name="lang" onchange="setLang('en')">
+<label for="swEN">🇺🇸 EN</label>
+</div>
+<div class="tb" id="tabBar"></div>
+<div id="content"></div>
+<div class="ft"><span class="zh">越南＋台灣旅遊攻略 2026 | RA1</span><span class="en">Vietnam + Taiwan Travel 2026 | RA1</span></div>
+</div>
+<div class="bnav" id="bnav"></div>
+<script>
+var L="zh",cur="home";
+var D=null;
+function mm(p){return p?"https://maps.me/search/?q="+encodeURIComponent(p):"#";}
+function $(id){return document.getElementById(id);}
+function tl(zh,en){return L==="zh"?zh:en;}
+function setLang(l){L=l;toggleLang();}
+function toggleLang(){
+  L=L==="zh"?"en":"zh";
+  $("#langLabel").textContent=L==="zh"?"EN":"中";
+  document.getElementById("sw"+(L==="zh"?"ZH":"EN")).checked=true;
+  document.querySelectorAll(".zh").forEach(function(e){e.style.display="";});
+  document.querySelectorAll(".en").forEach(function(e){e.style.display="none";});
+  if(L==="en"){
+    document.querySelectorAll(".zh").forEach(function(e){e.style.display="none";});
+    document.querySelectorAll(".en").forEach(function(e){e.style.display="";});
+  }
+  render();
+}
+var playingId=null;
+function stopV(){if(window.speechSynthesis)window.speechSynthesis.cancel();playingId=null;}
+function spk(text,lang,id){
+  if(!window.speechSynthesis)return;
+  stopV();
+  var u=new SpeechSynthesisUtterance(text);
+  u.lang=lang==="vi"?"vi-VN":lang==="tw"?"zh-TW":"zh-CN";
+  u.rate=0.85;
+  var voices=window.speechSynthesis.getVoices();
+  if(voices.length===0)window.speechSynthesis.getVoices();
+  var pref=voices.filter(function(v){return v.lang.startsWith(lang==="vi"?"vi":(lang==="tw"?"zh":"zh"));} );
+  if(pref.length>0){var nat=pref.find(function(v){return v.localService||v.name.includes("Enhanced");});u.voice=nat||pref[0];}
+  u.onend=function(){playingId=null;render();};
+  u.onerror=function(){playingId=null;render();};
+  playingId=id;
+  render();
+  try{window.speechSynthesis.speak(u);}catch(e){playingId=null;render();}
+}
+
+var TABS=[
+  {k:"home",zh:"🏠 首頁",en:"🏠 Home"},
+  {k:"days",zh:"📅 行程",en:"📅 Days"},
+  {k:"rest",zh:"🍜 餐廳",en:"🍜 Eats"},
+  {k:"hotel",zh:"🏨 住宿",en:"🏨 Hotel"},
+  {k:"flight",zh:"✈️ 航班",en:"✈️ Flight"},
+  {k:"phrase",zh:"📝 詞語",en:"📝 Phrases"},
+  {k:"chk",zh:"✅ Checklist",en:"✅ Checklist"}
+];
+var BNAV=[
+  {k:"home",zh:"首頁",lbl:{zh:"Home",en:"Home"}},
+  {k:"days",zh:"行程",lbl:{zh:"Days",en:"Days"}},
+  {k:"rest",zh:"餐廳",lbl:{zh:"Eats",en:"Eats"}},
+  {k:"hotel",zh:"住宿",lbl:{zh:"Hotel",en:"Hotel"}},
+  {k:"flight",zh:"航班",lbl:{zh:"Flight",en:"Flight"}},
+  {k:"phrase",zh:"詞語",lbl:{zh:"Phrases",en:"Phrases"}},
+  {k:"chk",zh:"Check",lbl:{zh:"Check",en:"Check"}}
+];
+var CITY_FILTERS=[
+  {zh:"全部",en:"All"},
+  {zh:"胡志明市",en:"HCMC"},
+  {zh:"芽莊",en:"Nha Trang"},
+  {zh:"大叻",en:"Dalat"},
+  {zh:"台灣",en:"Taiwan"}
+];
+window.cityF="全部";
+
+function render(){
+  stopV();
+  var el=$("content");
+  var html="";
+
+  if(cur==="home"){
+    html+='<div class="og">';
+    html+='<div class="oi" onclick="setTab(\'flight\')"><span class="em">✈️</span><span class="lb">'+tl("航班","Flights")+'</span><span class="sb">'+D.flights.length+tl("段"," segments")+'</span></div>';
+    html+='<div class="oi" onclick="setTab(\'hotel\')"><span class="em">🏨</span><span class="lb">'+tl("住宿","Hotels")+'</span><span class="sb">'+(D.days.filter(function(d){return d.st;}).length)+tl("晚"," nights")+'</span></div>';
+    html+='<div class="oi" onclick="setTab(\'days\')"><span class="em">📍</span><span class="lb">'+tl("城市","Cities")+'</span><span class="sb">4 '+tl("個城市"," cities")+'</span></div>';
+    html+='<div class="oi" onclick="setTab(\'rest\')"><span class="em">🍜</span><span class="lb">'+tl("餐廳","Restaurants")+'</span><span class="sb">'+D.rest.length+tl("間"," spots")+'</span></div>';
+    html+='</div>';
+    html+='<div class="st">🚨 '+tl("緊急電話","Emergency")+'</div>';
+    html+='<div class="ec"><div class="et">'+tl("緊急聯絡","Emergency Contacts")+'</div>';
+    for(var i=0;i<D.emergency.length;i++)html+='<div class="er"><span class="el">'+D.emergency[i].l+'</span><span>'+D.emergency[i].v+'</span></div>';
+    html+='</div>';
+    html+='<div class="st">💡 '+tl("旅遊小技巧","Travel Tips")+'</div>';
+    for(var i=0;i<D.tips.length;i++)html+='<div class="ic"><div class="ir"><div class="ii btag">💡</div><div class="icn"><div class="it">'+D.tips[i]+'</div></div></div></div>';
+  }
+
+  if(cur==="days"){
+    html+='<div class="ct-pad">';
+    for(var i=0;i<CITY_FILTERS.length;i++){
+      var f=CITY_FILTERS[i];
+      html+='<button class="flb" onclick="window.cityF=\''+f.zh+'\';render();">'+tl(f.zh,f.en)+'</button>';
+    }
+    html+='</div>';
+    for(var di=0;di<D.days.length;di++){
+      var d=D.days[di];
+      var show=(window.cityF==="全部"||d.ci===window.cityF)||(window.cityF==="台灣"&&(d.ci==="台北"||d.ci==="九份"));
+      html+='<div class="dc" '+(show?'>':'style="display:none">');
+      html+='<div class="dh" onclick="this.classList.toggle(\'exp\');var n=this.nextSibling;while(n&&n.className==\'si\'){n.style.display=n.style.display?\'\':\'none\';n=n.nextSibling;}"><span>'+d.ti+'</span><span class="ct">'+d.ci+'</span></div>';
+      for(var si=0;si<d.ss.length;si++){
+        var s=d.ss[si];
+        var pid="s_"+di+"_"+si;
+        html+='<div class="si">';
+        html+='<div class="tc">'+s.tm+'</div>';
+        html+='<div class="ac">'+s.ac+'</div>';
+        html+='<button class="bt" onclick="spk(\''+s.ac.replace(/\'/g,"\\'")+'\',\'zh\',\''+pid+'\')" style="background:#FF8E53">🎧</button>';
+        if(s.p)html+='<a class="bt map" href="'+mm(s.p)+'" target="_blank">📍 Maps.me</a>';
+        else html+='<div class="bt" style="background:#CCC">—</div>';
+        html+='</div>';
+      }
+      if(d.st)html+='<div class="si"><div class="tc">🏨</div><div class="ac">'+tl("住宿：","Stay: ")+d.st+'</div></div>';
+      html+='</div>';
+    }
+  }
+
+  if(cur==="rest"){
+    html+='<div class="st">🟠 '+tl("米其林推薦","Michelin Picks")+'</div>';
+    for(var i=0;i<D.rest.length;i++){
+      var r=D.rest[i];
+      if(r.t!=="米其林"&&r.t!=="Michelin")continue;
+      html+='<div class="rc"><div class="ri">🟠</div><div class="icn"><div class="it">'+r.n+' <span style="font-size:10px;color:#999">('+r.t+')</span></div><div class="is">'+r.c+tl(" | "," | ")+r.d+'</div></div><a class="bt map" href="'+mm(r.p)+'" target="_blank">📍 Maps.me</a></div>';
+    }
+    html+='<div class="st">🟢 '+tl("當地素食","Local Vegetarian")+'</div>';
+    for(var i=0;i<D.rest.length;i++){
+      var r=D.rest[i];
+      if(r.t==="米其林"||r.t==="Michelin")continue;
+      html+='<div class="rc"><div class="ri">🟢</div><div class="icn"><div class="it">'+r.n+' <span style="font-size:10px;color:#999">('+r.t+')</span></div><div class="is">'+r.c+tl(" | "," | ")+r.d+'</div></div><a class="bt map" href="'+mm(r.p)+'" target="_blank">📍 Maps.me</a></div>';
+    }
+    html+='<div class="ic" style="margin-top:10px"><div class="ir"><div class="ii btag">💡</div><div class="icn"><div class="it">'+tl("素食提示","Vegetarian Tip")+'</div><div class="is">'+tl("越南說「Toi an chay」<br>台灣說「我是素食者」<br>魚露常見，請說「Khong nuoc mam」","Say \"Toi an chay\" in Vietnam<br>Say \"我是素食者\" in Taiwan<br>Say \"Khong nuoc mam\" for no fish sauce")+'</div></div></div>';
+  }
+
+  if(cur==="hotel"){
+    for(var i=0;i<D.hotels.length;i++){
+      var h=D.hotels[i];
+      html+='<div class="ic"><div class="ir"><div class="ii bh">🏨</div><div class="icn"><div class="it">'+h.n+'</div><div class="is">'+h.c+tl(" | "," | ")+h.ds+"<br>📞 "+h.ph+'</div></div><a class="bt map" href="'+mm(h.p)+'" target="_blank">📍 Maps.me</a></div></div>';
+    }
+  }
+
+  if(cur==="flight"){
+    html+='<div class="st">✈️ '+tl("航班","Flights")+'</div>';
+    for(var i=0;i<D.flights.length;i++){
+      var f=D.flights[i];
+      html+='<div class="ic"><div class="ir"><div class="ii bf">✈️</div><div class="icn"><div class="it">'+f.a+" "+f.f+'</div><div class="is">'+f.r+tl(" | "," | ")+f.d+'</div></div><a class="bt map" href="'+mm(f.p)+'" target="_blank">📍 Maps.me</a></div></div>';
+    }
+  }
+
+  if(cur==="phrase"){
+    html+='<div class="sw">';
+    html+='<input type="radio" name="lang" id="swVI" checked onchange="setPhraseLang(\'vi\')"><label for="swVI">越南文</label>';
+    html+='<input type="radio" name="lang" id="swTW" onchange="setPhraseLang(\'tw\')"><label for="swTW">中文</label>';
+    html+='</div>';
+    html+='<div class="st">'+tl("🌟 日常用語","🌟 Greetings")+'</div>';
+    var vdata=D.voice[window.phraseLang||"vi"];
+    for(var i=0;i<vdata.greetings.length;i++){
+      var b=vdata.greetings[i];
+      var pid="p_vi_"+i;
+      html+='<div class="rc">';
+      html+='<div class="icn" style="flex:1"><div class="it">'+tl(b.zh,b.tw)+'</div><div class="is">'+(b.vi||b.pr)+'</div></div>';
+      html+='<button class="bt" onclick="spk(\''+(b.vi||b.pr).replace(/\'/g,"\\'")+'\',\''+(window.phraseLang||"vi")+'\',\''+pid+'\')" style="background:#FF8E53">🎧</button>';
+      html+='</div>';
+    }
+    html+='<div class="st">'+tl("🚨 緊急用語","🚨 Emergency")+'</div>';
+    for(var i=0;i<vdata.emergency.length;i++){
+      var b=vdata.emergency[i];
+      var pid="p_em_"+i;
+      html+='<div class="rc">';
+      html+='<div class="icn" style="flex:1"><div class="it" style="color:#C0392B">'+tl(b.zh,b.tw)+'</div><div class="is">'+(b.vi||b.pr)+'</div></div>';
+      html+='<button class="bt" onclick="spk(\''+(b.vi||b.pr).replace(/\'/g,"\\'")+'\',\''+(window.phraseLang||"vi")+'\',\''+pid+'\')" style="background:#C0392B">🎧</button>';
+      html+='</div>';
+    }
+  }
+
+  if(cur==="chk"){
+    html+='<div class="st">✅ '+tl("出發前檢查清單","Pre-Trip Checklist")+'</div>';
+    html+='<div class="chks">';
+    for(var i=0;i<D.chkl.length;i++){
+      html+='<div class="chki" onclick="chk['+i+']=!chk['+i+'];saveChk();render();">';
+      html+='<div class="chkbg">'+(chk[i]?'✓':'')+'</div>';
+      html+='<span style="'+(chk[i]?'text-decoration:line-through;color:#999':'')+'">'+D.chkl[i]+'</span>';
+      html+='</div>';
+    }
+    html+='</div>';
+    var done=chk.filter(function(c){return c;}).length;
+    html+='<div class="ic" style="margin-top:14px;text-align:center"><div class="ir"><div class="ii bv">'+done+'/'+D.chkl.length+'</div><div class="icn"><div class="it">'+tl("已完成","Completed")+'</div></div></div></div>';
+  }
+
+  el.innerHTML=html;
+  renderTabBar();
+  renderBNav();
+}
+
+function setPhraseLang(l){
+  window.phraseLang=l;
+  render();
+}
+
+function setTab(t){cur=t;render();window.scrollTo(0,0);}
+
+function renderTabBar(){
+  var el=$("tabBar");
+  if(!el)return;
+  var html="";
+  for(var i=0;i<TABS.length;i++){
+    var t=TABS[i];
+    html+='<div class="t'+(cur===t.k?" act":"")+'" data-tab="'+t.k+'" onclick="setTab(\''+t.k+'\')">'+tl(t.zh,t.en)+'</div>';
+  }
+  el.innerHTML=html;
+}
+
+function renderBNav(){
+  var el=$("bnav");
+  if(!el)return;
+  var html="";
+  var btabs=[
+    {k:"home",zh:"🏠",en:"🏠",lbl:{zh:"首頁",en:"Home"}},
+    {k:"days",zh:"📅",en:"📅",lbl:{zh:"行程",en:"Days"}},
+    {k:"rest",zh:"🍜",en:"🍜",lbl:{zh:"餐廳",en:"Eats"}},
+    {k:"hotel",zh:"🏨",en:"🏨",lbl:{zh:"住宿",en:"Hotel"}},
+    {k:"flight",zh:"✈️",en:"✈️",lbl:{zh:"航班",en:"Flight"}},
+    {k:"phrase",zh:"📝",en:"📝",lbl:{zh:"詞語",en:"Phrases"}},
+    {k:"chk",zh:"✅",en:"✅",lbl:{zh:"清單",en:"List"}}
+  ];
+  for(var i=0;i<btabs.length;i++){
+    var b=btabs[i];
+    html+='<button class="bn'+(cur===b.k?" act":"")+'" onclick="setTab(\''+b.k+'\')"><span class="be">'+b.zh+'</span><span class="lbl">'+tl(b.lbl.zh,b.lbl.en)+'</span></button>';
+  }
+  el.innerHTML=html;
+}
+</script>
+<script>
+var DATA={
+  "route":"胡志明市→芽莊→大叻→台灣",
+  "dates":"2026年4月16日-5月2日",
+  "flights":[
+    {"a":"中華航空","f":"CI 0023","r":"安大略 ONT→台北 TPE","d":"4/17 00:10→4/18 05:15","p":"Ontario International Airport"},
+    {"a":"中華航空","f":"CI 0781","r":"台北 TPE→胡志明市 SGN","d":"4/18 07:15-09:25","p":"Taiwan Taoyuan International Airport"},
+    {"a":"Vietnam Airlines","f":"VN 1342","r":"芽莊 CXR→大叻 DLI","d":"4/22 07:30-08:10","p":"Cam Ranh International Airport Nha Trang"},
+    {"a":"Vietnam Airlines","f":"VN 583","r":"大叻 DLI→胡志明市 SGN","d":"4/28 10:30-11:25","p":"Lien Khuong Airport Dalat"},
+    {"a":"中華航空","f":"CI 0782","r":"胡志明市 SGN→台北 TPE","d":"4/29 10:50-15:20","p":"Tan Son Nhat International Airport Ho Chi Minh City"},
+    {"a":"中華航空","f":"CI 0024","r":"台北 TPE→安大略 ONT","d":"5/2 21:10→5/2 18:00","p":"Taiwan Taoyuan International Airport"}
+  ],
+  "hotels":[
+    {"n":"Sherwood Residence","c":"胡志明市","ds":"4/18-4/23","ph":"+1-888-385-6609","p":"Sherwood Residence Ho Chi Minh City"},
+    {"n":"Sunrise Nha Trang Beach Hotel","c":"芽莊","ds":"4/23-4/27","ph":"+1-888-205-7322","p":"Sunrise Nha Trang Beach Hotel Nha Trang"},
+    {"n":"Swiss Belresort Tuyen Lam","c":"大叻","ds":"4/27-4/29","ph":"+84 02633 800 800","p":"Swiss Belresort Tuyen Lam Dalat"},
+    {"n":"Grand Forward Hotel","c":"板橋","ds":"4/29-5/2","ph":"+886-2-8951-2345","p":"Grand Forward Hotel New Taipei"}
+  ],
+  "rest":[
+    {"n":"Hum Garden","c":"胡志明市","t":"米其林","d":"11:00-21:00","p":"Hum Garden Ho Chi Minh City"},
+    {"n":"Vị Quê Kitchen","c":"胡志明市","t":"米其林","d":"07:00-21:00","p":"Viet Que Kitchen Ho Chi Minh City"},
+    {"n":"Quan Chay Nhu","c":"胡志明市","t":"當地素食","d":"06:00-21:00","p":"Quan Chay Nhu District 1 HCMC"},
+    {"n":"Cay Da Vegetarian","c":"胡志明市","t":"當地素食","d":"07:00-22:00","p":"Cay Da Vegetarian HCMC"},
+    {"n":"Loving Hut","c":"胡志明市","t":"當地素食","d":"07:00-22:00","p":"Loving Hut Ho Chi Minh City"},
+    {"n":"Good Morning Vietnam","c":"芽莊","t":"當地素食","d":"07:00-23:00","p":"Good Morning Vietnam Nha Trang"},
+    {"n":"Lien Hoa Vegetarian","c":"大叻","t":"當地素食","d":"06:00-20:00","p":"Lien Hoa Vegetarian Dalat"},
+    {"n":"7-11","c":"台灣","t":"便利","d":"24 hours","p":"7-Eleven Taiwan"}
+  ],
+  "tips":[
+    "越南說「Toi an chay」= 我是素食者",
+    "台灣說「我是素食者」= I am vegetarian",
+    "魚露是越南常用調味料，說「Khong nuoc mam」不要魚露",
+    "台灣海關對肉製品極嚴格，即便真空包裝也不准攜入",
+    "大叻早晚溫差大，記得带薄外套",
+    "胡志明市交通費便宜，Grab（摩托車）很方便",
+    "4月底越南雨季開始，隨身带雨具"
+  ],
+  "emergency":[
+    {"l":"越南報警","v":"113"},
+    {"l":"越南火警/救護","v":"114/115"},
+    {"l":"台灣報警","v":"110"},
+    {"l":"台灣火警/救護","v":"119"}
+  ],
+  "voice":{
+    "vi":{
+      "greetings":[
+        {"zh":"你好","vi":"Xin chao","pr":"sĭn chow"},
+        {"zh":"謝謝","vi":"Cam on","pr":"kahm ohn"},
+        {"zh":"早安","vi":"Chao buoi sang","pr":"chow boo-ee sáng"},
+        {"zh":"請問多少錢？","vi":"Bao nhieu tien?","pr":"bao nyew tyen"},
+        {"zh":"我是素食者","vi":"Toi an chay","pr":"toy ahn jai"},
+        {"zh":"魚露不要","vi":"Khong nuoc mam","pr":"khom nwok mam"},
+        {"zh":"便宜一點？","vi":"Giam gia duoc khong?","pr":"zyam za dwet khom"},
+        {"zh":"在那裡？","vi":"O dau?","pr":"aw dao"},
+        {"zh":"廁所在哪裡？","vi":"Nha ve sinh o dau?","pr":"nya yeh sĭn aw dao"},
+        {"zh":"我要這個","vi":"Toi muon cai nay","pr":"toy mwon guy nao"},
+        {"zh":"不用了，謝謝","vi":"Khong can, cam on","pr":"khom khan kahm ohn"}
+      ],
+      "emergency":[
+        {"zh":"救命！","vi":"Cuu!","pr":"koo-ew"},
+        {"zh":"報警","vi":"Bao cong an","pr":"bao kong án"},
+        {"zh":"叫救護車","vi":"Goi xe cuu thuong","pr":"goh xe koo-eh tor"},
+        {"zh":"我迷路了","vi":"Toi bi lac duong","pr":"toy bee lók yang"}
+      ]
+    },
+    "tw":{
+      "greetings":[
+        {"tw":"你好","pr":"nǐ hǎo"},
+        {"tw":"謝謝","pr":"xièxiè"},
+        {"tw":"我是素食者","pr":"wǒ shì sùshí zhě"},
+        {"tw":"請給我素食","pr":"qǐng gěi wǒ sùshí"},
+        {"tw":"多少錢？","pr":"duōshǎo qián?"},
+        {"tw":"太貴了","pr":"tài guìle"},
+        {"tw":"可以刷卡嗎？","pr":"kěyǐ shuākǎ ma?"},
+        {"tw":"廁所在哪裡？","pr":"cèsuǒ zài nǎlǐ?"},
+        {"tw":"請少辣","pr":"qǐng shǎo là"},
+        {"tw":"好吃","pr":"hǎochī"}
+      ]
+    }
+  },
+  "days":[
+    {"ti":"Day 1 | 4/16 | 到達胡志明市","ci":"胡志明市","ss":[
+      {"tm":"全天","ac":"抵達胡志明市新山一機場，休息調整時差","p":"Tan Son Nhat International Airport"},
+      {"tm":"20:00","ac":"品嘗越南素河粉（Phở Chay）","p":"Pho Chay Ho Chi Minh City"}
+    ]},
+    {"ti":"Day 2 | 4/17 | 胡志明市市區","ci":"胡志明市","ss":[
+      {"tm":"08:00","ac":"早餐：越南三明治（Bánh Mì）"},
+      {"tm":"09:00","ac":"【景點】獨立宮","p":"Independence Palace Ho Chi Minh City"},
+      {"tm":"11:00","ac":"【景點】耶穌聖心教堂（粉紅教堂）","p":"Notre-Dame Cathedral Saigon"},
+      {"tm":"13:00","ac":"午餐：Quan Chay Nhu 🟢 當地素食","p":"Quan Chay Nhu District 1 HCMC"},
+      {"tm":"15:30","ac":"【景點】西貢中央郵政局","p":"Saigon Central Post Office"},
+      {"tm":"18:00","ac":"晚餐：飯店附近素食餐廳"},
+      {"tm":"19:30","ac":"漫步阮雛步行街夜景"}
+    ]},
+    {"ti":"Day 3 | 4/18 | 胡志明市Instagram打卡","ci":"胡志明市","ss":[
+      {"tm":"09:30","ac":"【打卡】The Cafe Apartment","p":"The Cafe Apartment Ho Chi Minh City"},
+      {"tm":"13:00","ac":"午餐：Cay Da Vegetarian 🟢","p":"Cay Da Vegetarian HCMC"},
+      {"tm":"15:00","ac":"【打卡】Le Café des Stagiaires","p":"Le Café des Stagiaires Ho Chi Minh City"},
+      {"tm":"17:30","ac":"【打卡】Banana Mama Rooftop Bar","p":"Banana Mama Rooftop Bar Saigon"},
+      {"tm":"20:00","ac":"晚餐：Hum Garden 🟠 米其林","p":"Hum Garden Ho Chi Minh City"}
+    ]},
+    {"ti":"Day 4 | 4/19 | 胡志明市文化體驗","ci":"胡志明市","ss":[
+      {"tm":"09:00","ac":"【景點】戰爭博物館","p":"War Remnants Museum Ho Chi Minh City"},
+      {"tm":"11:00","ac":"【景點】美術博物館","p":"Vietnam Fine Arts Museum"},
+      {"tm":"13:00","ac":"午餐：Loving Hut 🟢","p":"Loving Hut Ho Chi Minh City"},
+      {"tm":"15:00","ac":"【逛街】范五老街","p":"Pham Ngu Lao Street Ho Chi Minh City"},
+      {"tm":"18:00","ac":"【逛街】濱城市場夜市","p":"Ben Thanh Market Ho Chi Minh City"},
+      {"tm":"20:00","ac":"晚餐：濱城市場素食小食 🟢"}
+    ]},
+    {"ti":"Day 5 | 4/20 | 胡志明市藝術美食","ci":"胡志明市","ss":[
+      {"tm":"09:30","ac":"【景點】Mariamman印度廟","p":"Mariamman Temple Ho Chi Minh City"},
+      {"tm":"11:00","ac":"【景點】天后宮","p":"Thien Hau Temple Ho Chi Minh City"},
+      {"tm":"13:00","ac":"午餐：Vị Quê Kitchen 🟠 米其林","p":"Viet Que Kitchen Ho Chi Minh City"},
+      {"tm":"15:00","ac":"【逛街】濱城市場購物","p":"Ben Thanh Market Ho Chi Minh City"},
+      {"tm":"17:30","ac":"【景點】阮雛步行街"},
+      {"tm":"20:00","ac":"最後晚餐：越南素火鍋"}
+    ]},
+    {"ti":"Day 6 | 4/21 | 告別胡志明市","ci":"胡志明市","ss":[
+      {"tm":"09:00","ac":"自由活動 / 最後購物"},
+      {"tm":"11:00","ac":"退房"},
+      {"tm":"14:00","ac":"飛往芽莊（1小時）"},
+      {"tm":"15:00","ac":"抵達金蘭國際機場"},
+      {"tm":"16:00","ac":"入住 Sunrise Nha Trang Beach Hotel","p":"Sunrise Nha Trang Beach Hotel"},
+      {"tm":"18:00","ac":"沙灘散步"},
+      {"tm":"20:00","ac":"海灘夜市"}
+    ]},
+    {"ti":"Day 7 | 4/22 | 芽莊沙灘打卡","ci":"芽莊","ss":[
+      {"tm":"06:30","ac":"【景點】芽莊海灘日出🌅","p":"Nha Trang Beach Vietnam"},
+      {"tm":"09:30","ac":"【打卡】Ola Cafe","p":"Ola Cafe Nha Trang"},
+      {"tm":"13:00","ac":"午餐：海灘附近餐廳"},
+      {"tm":"14:00","ac":"【景點】婆那加占婆塔","p":"Po Nagar Cham Towers Nha Trang"},
+      {"tm":"16:30","ac":"【打卡】Jungle Coffee","p":"Jungle Coffee Nha Trang"},
+      {"tm":"18:30","ac":"海灘夕陽🌅"},
+      {"tm":"20:00","ac":"晚餐：Good Morning Vietnam 🟢","p":"Good Morning Vietnam Nha Trang"}
+    ]},
+    {"ti":"Day 8 | 4/23 | 芽莊跳島/一日遊","ci":"芽莊","ss":[
+      {"tm":"08:00","ac":"【活動】芽莊四島一日遊 或 Vinpearl Land","p":"Vinpearl Land Nha Trang"},
+      {"tm":"12:00","ac":"午餐：島上/園區內"},
+      {"tm":"15:00","ac":"返回市區"},
+      {"tm":"17:00","ac":"【休閒】飯店泳池 / 海灘"},
+      {"tm":"20:00","ac":"晚餐：當地素食餐廳 🟢"}
+    ]},
+    {"ti":"Day 9 | 4/24 | 芽莊放鬆日","ci":"芽莊","ss":[
+      {"tm":"08:00","ac":"早餐：飯店早餐"},
+      {"tm":"09:00","ac":"【休閒】早晨海灘/泳池"},
+      {"tm":"11:00","ac":"【Spa】傳統按摩（素食友好）"},
+      {"tm":"13:00","ac":"午餐：海灘附近素食 🟢"},
+      {"tm":"15:00","ac":"【逛街】Nha Trang Center 商場"},
+      {"tm":"18:00","ac":"最後海灘夕陽"},
+      {"tm":"20:00","ac":"沙灘燭光晚餐"}
+    ]},
+    {"ti":"Day 10 | 4/25 | 芽莊→大叻","ci":"大叻","ss":[
+      {"tm":"08:00","ac":"退房，出發大叻（約3.5-4小時）"},
+      {"tm":"12:00","ac":"抵達大叻，入住 Swiss Belresort Tuyen Lam","p":"Swiss Belresort Tuyen Lam Dalat"},
+      {"tm":"13:00","ac":"午餐：飯店餐廳 / 當地素食 🟢"},
+      {"tm":"15:00","ac":"【打卡】Ixora Dalat","p":"Ixora Dalat"},
+      {"tm":"17:30","ac":"【景點】春長湖散步","p":"Xuan Huong Lake Dalat"},
+      {"tm":"19:00","ac":"晚餐：當地法式料理 / 素食 🟢"}
+    ]},
+    {"ti":"Day 11 | 4/26 | 大叻浪漫山城","ci":"大叻","ss":[
+      {"tm":"08:30","ac":"【打卡】Mê Linh咖啡園","p":"Mê Linh Coffee Garden Dalat"},
+      {"tm":"10:30","ac":"【景點】大叻花園","p":"Dalat Flower Park"},
+      {"tm":"12:30","ac":"午餐：Lien Hoa Vegetarian 🟢","p":"Lien Hoa Vegetarian Dalat"},
+      {"tm":"14:00","ac":"【景點】瘋狂屋 Crazy House","p":"Hang Nga Guesthouse Crazy House Dalat"},
+      {"tm":"16:00","ac":"【景點】羅兵山","p":"Robin Hill Dalat"},
+      {"tm":"18:00","ac":"【逛街】大叻夜市"},
+      {"tm":"20:00","ac":"晚餐：夜市素食小食 🟢"}
+    ]},
+    {"ti":"Day 12 | 4/27 | 告別大叻","ci":"大叻","ss":[
+      {"tm":"08:30","ac":"【景點】竹林禪寺","p":"Tru Lam Pagoda Dalat"},
+      {"tm":"10:30","ac":"【景點】愛情谷","p":"Valley of Love Dalat"},
+      {"tm":"12:30","ac":"午餐：湖畔素食餐廳 🟢"},
+      {"tm":"14:00","ac":"最後購物：大叻咖啡、草莓乾"},
+      {"tm":"15:00","ac":"退房，返回胡志明市（約4-5小時）"},
+      {"tm":"20:00","ac":"抵達胡志明市，入住 Sherwood Residence","p":"Sherwood Residence Ho Chi Minh City"},
+      {"tm":"21:00","ac":"晚餐：最近素食餐廳 🟢"}
+    ]},
+    {"ti":"Day 13 | 4/28 | 胡志明市→台灣","ci":"台北","ss":[
+      {"tm":"12:00","ac":"退房"},
+      {"tm":"14:00","ac":"飛往台灣（桃園國際機場）"},
+      {"tm":"19:00","ac":"抵達台灣，通過入境檢查"},
+      {"tm":"20:30","ac":"入住 Grand Forward Hotel, 板橋","p":"Grand Forward Hotel New Taipei"},
+      {"tm":"21:00","ac":"遊覽板橋湳雅觀光夜市 / 便利商店素食 🟢"}
+    ]},
+    {"ti":"Day 14 | 4/29 | 台北市區探索","ci":"台北","ss":[
+      {"tm":"09:00","ac":"【景點】龍山寺","p":"Longshan Temple Taipei"},
+      {"tm":"10:30","ac":"【逛街】剥皮寮歷史街區"},
+      {"tm":"11:30","ac":"【逛街】西門町","p":"Ximending Taipei"},
+      {"tm":"13:00","ac":"午餐：師大夜市素食 🟢","p":"Shida Night Market Taipei"},
+      {"tm":"14:30","ac":"【景點】中正紀念堂","p":"Chiang Kai-shek Memorial Hall Taipei"},
+      {"tm":"16:30","ac":"【逛街】信義區 / 台北101外觀","p":"Taipei 101"},
+      {"tm":"18:00","ac":"【打卡】象山步道—101夜景","p":"Xiangshan Trail Taipei"},
+      {"tm":"20:00","ac":"晚餐：寧夏夜市素食 🟢","p":"Ningxia Night Market Taipei"}
+    ]},
+    {"ti":"Day 15 | 4/30 | 台北—九份一日遊","ci":"九份","ss":[
+      {"tm":"08:30","ac":"出發九份（約1.5小時客運）","p":"Jiufen Old Street"},
+      {"tm":"10:00","ac":"【景點】瑞芳石頭街","p":"Shufeng Street Jiufen"},
+      {"tm":"10:30","ac":"【打卡】A-Mei Tea House"},
+      {"tm":"13:00","ac":"午餐：九份素食（芋圓、筍絲糕）🟢"},
+      {"tm":"14:30","ac":"【景點】陰陽海","p":"Yin-Yang Sea Jiaoxi"},
+      {"tm":"15:30","ac":"【景點】黃金博物館","p":"National Taiwan Museum Gold Museum"},
+      {"tm":"17:00","ac":"返回台北"},
+      {"tm":"19:30","ac":"晚餐：士林夜市素食盛宴 🟢","p":"Shilin Night Market Taipei"}
+    ]},
+    {"ti":"Day 16 | 5/1 | 台北最後一天","ci":"台北","ss":[
+      {"tm":"09:00","ac":"【逛街】迪化街","p":"Dihua Street Taipei"},
+      {"tm":"11:00","ac":"【景點】大稻埕","p":"Dadaocheng Taipei"},
+      {"tm":"12:30","ac":"午餐：寧夏夜市最後素食 🟢","p":"Ningxia Night Market Taipei"},
+      {"tm":"14:00","ac":"購買伴手禮：鳳梨酥、牛軋糖、茶"},
+      {"tm":"15:30","ac":"整理行李"},
+      {"tm":"17:00","ac":"退房"},
+      {"tm":"17:30","ac":"前往桃園國際機場","p":"Taiwan Taoyuan International Airport"},
+      {"tm":"21:00","ac":"返回美國 ✈️"}
+    ]}
+  ],
+  "chkl":[
+    "護照有效期限6個月以上",
+    "機票確認（6段航班）",
+    "越南簽證",
+    "台灣入境許可",
+    "旅遊保險",
+    "越南盾（VND）兌換",
+    "美元現金備用",
+    "SIM卡或eSIM",
+    "越南离线地圖下載",
+    "Google Translate离线越南語",
+    "Grab App安裝並設定",
+    "住宿預訂確認列印",
+    "緊急聯絡人資料",
+    "個人藥物備足",
+    "防晒/防蚊液",
+    "轻便雨具",
+    "薄外套（大叻溫差）",
+    "素食餐廳列表下載離线",
+    "孩子照顧安排確認",
+    "家門鑰匙",
+    "手機漫遊設定",
+    "銀行海外刷卡通知設定"
+  ]
+};
+</script>
+<script>
+D=DATA;
+var chk=JSON.parse(localStorage.getItem("chufalf_chk")||"[]");
+if(chk.length!==D.chkl.length)chk=D.chkl.map(function(){return false;});
+function saveChk(){localStorage.setItem("chufalf_chk",JSON.stringify(chk));}
+if(window.speechSynthesis){
+  window.speechSynthesis.getVoices();
+  window.speechSynthesis.onvoiceschanged=function(){window.speechSynthesis.getVoices();};
+}
+render();
+</script>
+</body>
+</html>

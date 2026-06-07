@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>論語專案 - 工作方案選擇</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            color: rgba(255,255,255,0.9);
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+        
+        .option-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border: 3px solid transparent;
+        }
+        
+        .option-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+        
+        .option-card.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+        }
+        
+        .option-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .option-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: white;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .option-a .option-icon {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .option-b .option-icon {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .option-c .option-icon {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .option-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .option-desc {
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+        
+        .option-steps {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-top: 15px;
+        }
+        
+        .step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+            color: #555;
+        }
+        
+        .step:last-child {
+            margin-bottom: 0;
+        }
+        
+        .step-icon {
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        
+        .selected-badge {
+            display: none;
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-left: auto;
+        }
+        
+        .option-card.selected .selected-badge {
+            display: inline-block;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            display: block;
+            margin: 40px auto 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
+        }
+        
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+        
+        .selected-info {
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 30px;
+            color: white;
+            text-align: center;
+        }
+        
+        .selected-info h3 {
+            margin-bottom: 10px;
+        }
+        
+        .selected-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #ffd700;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 論語專案 - 工作方案選擇</h1>
+        <p class="subtitle">請選擇你希望我執行的工作方案</p>
+        
+        <div class="option-card option-a" onclick="selectOption('A')">
+            <div class="option-header">
+                <div class="option-icon">A</div>
+                <div class="option-title">先完成 512 則結構合併</div>
+                <div class="selected-badge">✓ 已選擇</div>
+            </div>
+            <div class="option-desc">
+                確保每則都有完整的七標籤結構（原文、文字註、先天解、白話解、現代啟示、故事啟示、現代典範），即使部分內容標註為「待補充」。
+            </div>
+            <div class="option-steps">
+                <div class="step">
+                    <span class="step-icon">1️⃣</span>
+                    <span>從備份檔（435 則）提取完整內容</span>
+                </div>
+                <div class="step">
+                    <span class="step-icon">2️⃣</span>
+                    <span>合併到 512 則模板</span>
+                </div>
+                <div class="step">
+                    <span class="step-icon">3️⃣</span>
+                    <span>補充缺失的 77 則框架（標註待補充）</span>
+                </div>
+                <div class="step">
+                    <span class="step-icon">4️⃣</span>
+                    <span>驗證七標籤結構完整性</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="option-card option-b" onclick="selectOption('B')">
+            <div class="option-header">
+                <div class="option-icon">B</div>
+                <div class="option-title">直接開始撰寫完整內容</div>
+                <div class="selected-badge">✓ 已選擇</div>
+            </div>
+            <div class="option-desc">
+                從學而第一開始，逐則撰寫完整的【先天解】、【故事啟示】、【現代典範】，不限制字數，每則都要豐富、深刻、不重複。
+            </div>
+            <div class="option-steps">
+                <div class="step">
+                    <span class="step-icon">1️⃣</span>
+                    <span>從學而第一（16 則）開始</span>
+                </div>
+                <div class="step">
+                    <span class="step-icon">2️⃣</span>
+                    <span>每則撰寫 200-500 字的【先天解】</span>
+                </div>
+                <div class="step">
+                    <span class="step-icon">3️⃣</span>
+                    <span>每則撰寫 200-500 字的【故事啟示】</span>
+                </div>
+                <div class="step">
+                    <span class="step-icon">4️⃣</span>
+                    <span>每則撰寫 200-500 字的【現代典範】</span>
+                </div>
+                <div class="step">
+                    <span class="step-icon">5️⃣</span>
+                    <span>每完成一章立即寫入並驗證</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="option-card option-c" onclick="selectOption('C')">
+            <div class="option-header">
+                <div class="option-icon">C</div>
+                <div class="option-title">先修復現有 435 則 docx</div>
+                <div class="selected-badge">✓ 已選擇</div>
+            </div>
+            <div class="option-desc">
+                確保已有的 435 則內容正確無誤，生成 docx 並驗證，然後再補充缺失的 77 則。
+            </div>
+            <div class="option-steps">
+                <div class="step">
+                    <span class="step-icon">1️⃣</span>
+                    <span>驗證備份檔 435 則完整性</span>
+                </div>
+                <div class="step">
+                    <span class="step-icon">2️⃣</span>
+                    <span>生成 docx 文件</span>
+                </div>
+                <div class="step">
+                    <span class="step-icon">3️⃣</span>
+                    <span>執行三綠燈驗證</span>
+                </div>
+                <div class="step">
+                    <span class="step-icon">4️⃣</span>
+                    <span>驗證通過後上傳 Drive</span>
+                </div>
+                <div class="step">
+                    <span class="step-icon">5️⃣</span>
+                    <span>再補充缺失的 77 則</span>
+                </div>
+            </div>
+        </div>
+        
+        <button class="submit-btn" id="submitBtn" disabled onclick="submitSelection()">
+            確認選擇
+        </button>
+        
+        <div class="selected-info" id="selectedInfo" style="display: none;">
+            <h3>當前選擇</h3>
+            <div class="selected-value" id="selectedValue">-</div>
+        </div>
+    </div>
+    
+    <script>
+        let selectedOption = null;
+        
+        function selectOption(option) {
+            selectedOption = option;
+            
+            // 移除所有選中狀態
+            document.querySelectorAll('.option-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // 添加選中狀態
+            document.querySelector(`.option-${option}`).classList.add('selected');
+            
+            // 更新按鈕狀態
+            document.getElementById('submitBtn').disabled = false;
+            
+            // 顯示選擇信息
+            document.getElementById('selectedInfo').style.display = 'block';
+            document.getElementById('selectedValue').textContent = `選項 ${option}`;
+        }
+        
+        function submitSelection() {
+            if (!selectedOption) return;
+            
+            const options = {
+                'A': {
+                    title: '先完成 512 則結構合併',
+                    message: '✅ 你選擇了：先完成 512 則結構合併\n\n我將：\n• 從備份檔（435 則）提取完整內容\n• 合併到 512 則模板\n• 補充缺失的 77 則框架\n• 驗證七標籤結構完整性\n\n開始執行...'
+                },
+                'B': {
+                    title: '直接開始撰寫完整內容',
+                    message: '✅ 你選擇了：直接開始撰寫完整內容\n\n我將：\n• 從學而第一（16 則）開始\n• 每則撰寫 200-500 字的完整內容\n• 每完成一章立即寫入並驗證\n• 不限制字數，確保豐富深刻\n\n開始執行...'
+                },
+                'C': {
+                    title: '先修復現有 435 則 docx',
+                    message: '✅ 你選擇了：先修復現有 435 則 docx\n\n我將：\n• 驗證備份檔 435 則完整性\n• 生成 docx 文件\n• 執行三綠燈驗證\n• 驗證通過後上傳 Drive\n• 再補充缺失的 77 則\n\n開始執行...'
+                }
+            };
+            
+            alert(options[selectedOption].message);
+            
+            // 這裡可以添加回傳給 Hermes 的邏輯
+            console.log(`用戶選擇了選項 ${selectedOption}: ${options[selectedOption].title}`);
+        }
+    </script>
+</body>
+</html>

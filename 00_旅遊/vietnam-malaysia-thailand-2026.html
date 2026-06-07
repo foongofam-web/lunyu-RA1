@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SEA Elite Trip 2026</title>
+    <style>
+        :root {
+            --primary: #173F7F;
+            --primary-light: #2E6DB4;
+            --accent: #FF6B35;
+            --bg: #F4F7FB;
+            --card: #FFFFFF;
+            --text: #222222;
+            --text-muted: #666666;
+        }
+        *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+        body{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Microsoft JhengHei",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.5}
+        .h{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#FFF;padding:20px 15px;position:sticky;top:0;z-index:100;box-shadow:0 4px 12px rgba(23,63,127,0.3);text-align:center}
+        .h h1{font-size:20px;font-weight:700;letter-spacing:0.5px}
+        .h .r{font-size:13px;opacity:0.9;margin-top:4px}
+        .h .d{font-size:11px;opacity:0.7;margin-top:2px}
+        .tb{display:flex;background:#FFF;border-bottom:1px solid #DDD;overflow-x:auto;position:sticky;top:78px;z-index:99;scrollbar-width:none}
+        .tb::-webkit-scrollbar{display:none}
+        .tb .t{flex:0 0 auto;padding:12px 16px;font-size:13px;font-weight:600;color:var(--text-muted);cursor:pointer;white-space:nowrap;transition:all 0.2s}
+        .tb .t.act{color:var(--primary);border-bottom:3px solid var(--primary)}
+        .con{padding:15px;max-width:600px;margin:0 auto;padding-bottom:50px}
+        .st{font-size:15px;font-weight:700;color:var(--primary);margin:20px 0 10px;display:flex;align-items:center;gap:6px}
+        .dc{background:var(--card);border-radius:16px;margin-bottom:12px;box-shadow:0 4px 12px rgba(0,0,0,0.05);overflow:hidden;animation:fadeIn 0.4s ease}
+        .dh{background:var(--primary);color:#FFF;padding:12px 15px;font-size:14px;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+        .dh .ct{background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:12px;font-size:11px;font-weight:normal}
+        .si{display:flex;padding:12px 15px;border-bottom:1px solid #F0F0F0;gap:12px;align-items:flex-start}
+        .si:last-child{border-bottom:none}
+        .tc{flex:0 0 45px;font-size:12px;font-weight:600;color:var(--primary);padding-top:2px}
+        .ac{flex:1;font-size:14px;color:var(--text)}
+        .tg{display:inline-block;font-size:10px;padding:2px 6px;border-radius:4px;font-weight:600;margin-right:5px;vertical-align:middle}
+        .ts{background:#D6E4F0;color:var(--primary)}
+        .tf{background:#FFF3E0;color:#F39C12}
+        .tl{background:#F3E5F5;color:#7B1FA2}
+        .mb{display:inline-flex;align-items:center;justify-content:center;background:var(--primary);color:#FFF;border:none;border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer;text-decoration:none;font-weight:600;transition:background 0.2s}
+        .mb:active{background:var(--primary-light)}
+        .mb.spk{background:var(--accent)}
+        .mb.spk.playing{background:#27AE60;animation:pulse 1s infinite}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
+        .ic{background:var(--card);border-radius:16px;margin-bottom:12px;box-shadow:0 4px 12px rgba(0,0,0,0.05);overflow:hidden}
+        .ir{display:flex;align-items:center;padding:15px;border-bottom:1px solid #F0F0F0;gap:15px}
+        .ii{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex:0 0 36px}
+        .bf{background:#E3F2FD}
+        .bh{background:#FFF8E1}
+        .bt{background:#FCE4EC}
+        .icn{flex:1}
+        .icn .it{font-size:14px;font-weight:700}
+        .icn .is{font-size:12px;color:var(--text-muted);margin-top:4px}
+        .rc{background:var(--card);border-radius:16px;margin-bottom:12px;box-shadow:0 4px 12px rgba(0,0,0,0.05);padding:15px;display:flex;gap:12px;align-items:center}
+        .ri{font-size:24px;flex:0 0 30px}
+        .cb{display:flex;align-items:center;padding:12px 15px;background:var(--card);border-radius:12px;margin-bottom:8px;gap:12px;font-size:14px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.03);transition:all 0.2s}
+        .cb .bx{width:22px;height:22px;border:2px solid var(--primary);border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--primary);font-weight:bold}
+        .cb.done{opacity:.6;text-decoration:line-through}
+        .ec{background:linear-gradient(135deg,#C0392B,#E74C3C);color:#FFF;border-radius:16px;padding:15px;margin-bottom:15px}
+        .ec .et{font-size:14px;font-weight:700;margin-bottom:8px;display:block}
+        .ec .er{font-size:12px;margin-bottom:5px;display:flex;justify-content:space-between}
+        .ec .el{font-weight:600;opacity:0.9}
+        .og{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:15px}
+        .oi{background:var(--card);border-radius:16px;padding:15px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,0.05);cursor:pointer}
+        .oi .em{font-size:30px;display:block;margin-bottom:5px}
+        .oi .lb{font-weight:700;color:var(--primary);display:block}
+        .oi .sb{font-size:11px;color:var(--text-muted)}
+        .ph{background:var(--card);border-radius:16px;margin-bottom:15px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.05)}
+        .phh{background:var(--accent);color:#FFF;padding:12px 15px;font-size:14px;font-weight:700;display:flex;justify-content:space-between}
+        .phh .lb{font-size:11px;opacity:0.8}
+        .phs{display:flex;flex-wrap:wrap;gap:8px;padding:15px}
+        .pbc{background:var(--primary);color:#FFF;border:none;border-radius:10px;padding:10px 15px;font-size:13px;font-weight:600;cursor:pointer;flex:1;min-width:120px;transition:all 0.2s}
+        .pbc:active{transform:scale(0.96);background:var(--primary-light)}
+        .pbc.playing{background:#27AE60}
+        .pbc.alt{background:#FFF;color:var(--primary);border:1px solid var(--primary)}
+        .pbc.alt.playing{background:#E8F5E9;color:#27AE61;border-color:#27AE61}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+    <script>
+        const DATA = {
+            route: "胡志明市 → 檳城 → 合艾 → 吉隆坡",
+            dates: "2026年5月27日 - 6月23日",
+            checkin: [
+                {a: "中華航空 (China Airlines)", url: "https://www.china-airlines.com/tw/en/fly/check-in"},
+                {a: "亞航 (AirAsia)", url: "https://www.airasia.com/check-in"}
+            ],
+            flights: [
+                {a: "中華航空 (China Airlines)", f: "CI 0007", r: "LAX → TPE", d: "5/27 00:05 → 5/28 05:10", p: "LAX Airport"},
+                {a: "中華航空 (China Airlines)", f: "CI 0783", r: "TPE → SGN", d: "5/28 13:45 → 5/28 16:20", p: "Taoyuan Airport"},
+                {a: "亞航 (AirAsia)", f: "AK 1503", r: "SGN → PEN", d: "6/12 13:30 → 6/12 16:10", p: "SGN Airport"},
+                {a: "中華航空 (China Airlines)", f: "CI 0722", r: "KUL → TPE", d: "6/23 14:45 → 6/23 19:35", p: "KLIA Airport"},
+                {a: "中華航空 (China Airlines)", f: "CI 0008", r: "TPE → LAX", d: "6/23 23:50 → 6/23 20:04", p: "Taoyuan Airport"}
+            ],
+            hotels: [
+                {n: "Sherwood Residence", c: "胡志明市", ds: "5/28, 6/10-11", ph: "+84 28...", p: "Sherwood Residence HCMC"},
+                {n: "My Tho Local Stay", c: "美 iterates", ds: "5/29 - 6/5", ph: "N/A", p: "My Tho"},
+                {n: "Sunrise Nha Trang Beach Hotel & Spa", c: "芽莊", ds: "6/6 - 6/9", ph: "N/A", p: "Sunrise Nha Trang"},
+                {n: "Ipoh Guest House", c: "怡保", ds: "6/12 - 6/14", ph: "N/A", p: "Ipoh"},
+                {n: "Atelier Ome Penang", c: "檳城", ds: "6/15 - 6/16", ph: "N/A", p: "Atelier Ome Penang"},
+                {n: "Centara Hotel Hat Yai (โรงแรมเซ็นทารา หาดใหญ่)", c: "合艾 (TH)", ds: "6/17 - 6/19", ph: "N/A", p: "Centara Hotel Hat Yai"},
+                {n: "No.23 Jalan Sri Klebang", c: "怡保", ds: "6/20 - 6/21", ph: "N/A", p: "31200 Bandar Baru Sri Klebang"},
+                {n: "KL City Hotel", c: "吉隆 lsa", ds: "6/21 - 6/22", ph: "N/A", p: "Kuala Lumpur"}
+            ],
+            days: [
+                {ti: "5/28", ci: "胡志明市", ss: [{tm: "16:20", tg: "flight", ac: "抵達胡志明市 SGN (CI0783)", p: "Tan Son Nhat Airport"}]},
+                {ti: "5/29-6/5", ci: "美 iterates", ss: [{tm: "全天", tg: "leisure", ac: "My Tho 水鄉探索與放鬆", p: "My Tho"}]},
+                {ti: "6/6-6/9", ci: "芽莊", ss: [{tm: "全天", tg: "sightseeing", ac: "芽莊海灘度假 & 潛水探索", p: "Sunrise Nha Trang"}]},
+                {ti: "6/10-6/11", ci: "胡志明市", ss: [{tm: "全天", tg: "shopping", ac: "返回胡志明市市區 & 選購禮品", p: "Sherwood Residence"}]},
+                {ti: "6/12", ci: "檳城", ss: [{tm: "13:30", tg: "flight", ac: "飛往檳城 PEN (AK1503)", p: "Penang International Airport"}]},
+                {ti: "6/12-6/14", ci: "怡保", ss: [{tm: "全天", tg: "food", ac: "怡保白咖啡 & 古都美食", p: "Ipoh"}]},
+                {ti: "6/15-6/16", ci: "檳城", ss: [{tm: "全天", tg: "hotel", ac: "入住 Atelier Ome 藝術酒店", p: "Atelier Ome Penang"}]},
+                {ti: "6/17-6/19", ci: "合艾", ss: [{tm: "全天", tg: "sightseeing", ac: "泰國合艾跨境之旅", p: "Centara Hotel Hat Yai"}]},
+                {ti: "6/20-6/21", ci: "怡保", ss: [{tm: "全天", tg: "leisure", ac: "入住 Jalan Sri Klebang", p: "Bandar Baru Sri Klebang"}]},
+                {ti: "6/21-6/22", ci: "吉隆坡", ss: [{tm: "全天", tg: "shopping", ac: "吉隆坡雙塔 & 市區之行", p: "Kuala Lumpur"}]},
+                {ti: "6/23", ci: "回程", ss: [{tm: "14:45", tg: "flight", ac: "飛往台北 TPE (CI0722)", p: "KLIA Airport"}]}
+            ],
+            restaurants: [
+                {n: "Hum Garden (HCMC)", c: "胡志明市", t: "米其林", d: "頂級精緻純素食", p: "Hum Garden Ho Chi Minh City"},
+                {n: "Vị Quê Kitchen", c: "胡志明市", t: "米其林", d: "傳統越南風素食", p: "Vi Que Kitchen HCMC"},
+                {n: "Penang Vegan Cafe", c: "檳城", t: "在地推薦", d: "檳城特色素食炒粿條", p: "Georgetown Vegan Penang"},
+                {n: "Ipoh Green Garden", c: "怡保", t: "在地推薦", d: "怡保純素咖啡館", p: "Ipoh Vegan Cafe"},
+                {n: "Central Festival Hatyai (Food Court)", c: "合艾", t: "購物中心", d: "尋找黃色 'Jay' 標誌素食攤", p: "Central Festival Hatyai"},
+                {n: "Thai Jay Delight", c: "合艾", t: "泰國素食", d: "正宗泰式齋料理", p: "Hatyai Jay Vegan"}
+            ],
+            checklist: [
+                "護照 & 越南/馬來/泰國簽證",
+                "機票 Booking No: 1658112001222160",
+                "國際通用轉接頭 (Multi-Adapter)",
+                "五葷素提示卡 (中英泰馬四語)",
+                "個人常備藥品 & 骨折復健用品",
+                "Google Maps 離線地圖下載"
+            ],
+            emergency: [
+                {l: "越南-報警", v: "113"},
+                {l: "馬來西亞-報警", v: "999"},
+                {l: "泰國-報警", v: "191"},
+                {l: "美國大使館", v: "+84-28-3520-1500"}
+            ],
+            tips: [
+                "🇻🇳 越南素食：說 'Tôi ăn chay'，拒絕魚露請說 'Không nước mắm'",
+                "🇹🇭 泰國素食：尋找黃色旗幟 'Jay' (齋) 標誌",
+                "🇲🇾 馬來素食：說 'Saya makan vegetarian'",
+                "📍 地圖跳轉：所有地點均採用英文地址，確保 GPS 導航精準"
+            ]
+        };
+
+        const VOICE = {
+            vi: {
+                greetings: [
+                    {vi: "Xin chào", zh: "你好", en: "Hello", pr: "SIn chao"},
+                    {vi: "Tôi ăn chay", zh: "我是素食者", en: "I am vegetarian", pr: "Toi an chay"},
+                    {vi: "Không nước mắm", zh: "不要魚露", en: "No fish sauce", pr: "Khong nuoc mam"},
+                    {vi: "Cảm ơn", zh: "謝謝", en: "Thank you", pr: "Cam on"}
+                ],
+                emergency: [{vi: "Giúp tôi với!", zh: "救救我！", en: "Help me!", pr: "Giup toi voi!"}]
+            },
+            ms: {
+                greetings: [
+                    {ms: "Selamat datang", zh: "你好 / 歡迎", en: "Welcome / Hello", pr: "Sela-mat da-tang"},
+                    {ms: "Saya makan vegetarian", zh: "我是素食者", en: "I am vegetarian", pr: "Sa-ya ma-kan ve-ge-ta-ri-an"},
+                    {ms: "Tanpa bawang", zh: "不要蔥蒜五葷", en: "No onions/garlic", pr: "Tan-pa ba-wang"},
+                    {ms: "Terima kasih", zh: "謝謝", en: "Thank you", pr: "Te-ri-ma ka-sih"}
+                ],
+                emergency: [{ms: "Tolong saya!", zh: "幫幫我！", en: "Help me!", pr: "To-long sa-ya!"}]
+            },
+            th: {
+                greetings: [
+                    {th: "Sawatdee krap", zh: "你好 (男)", en: "Hello", pr: "Sawat-dee-krap"},
+                    {th: "Gin jay", zh: "我吃齋/素食", en: "I eat vegan/Jay", pr: "Gin-jay"},
+                    {th: "Mai sai kratiem", zh: "不要蒜", en: "No garlic", pr: "Mai-sai-kra-tiem"},
+                    {th: "Khop khun krap", zh: "謝謝", en: "Thank you", pr: "Khop-khun-krap"}
+                ],
+                emergency: [{th: "Chuay duay!", zh: "救命！", en: "Help me!", pr: "Chuay-duay!"}]
+            }
+        };
+
+        let currentTab = "overview";
+        let playingId = null;
+
+        function stopVoice() {
+            if (window.speechSynthesis) window.speechSynthesis.cancel();
+            playingId = null;
+        }
+
+        function speak(text, lang, id) {
+            if (!window.speechSynthesis) return;
+            stopVoice();
+            const u = new SpeechSynthesisUtterance(text);
+            u.lang = lang === "vi" ? "vi-VN" : (lang === "ms" ? "ms-MY" : (lang === "th" ? "th-TH" : "zh-TW"));
+            u.rate = 0.85;
+            playingId = id;
+            render();
+            window.speechSynthesis.speak(u);
+            u.onend = () => { playingId = null; render(); };
+        }
+
+        function gm(p) { return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p)}`; }
+        function tgL(v) {
+            const m = {sightseeing: "景點", instagram: "打卡", food: "美食", shopping: "逛街", leisure: "休閒", hotel: "住宿", flight: "航班"};
+            return m[v] || v;
+        }
+        function ctL(v) {
+            const m = {sightseeing: "ts", instagram: "ti2", food: "tf", shopping: "tc2", leisure: "tl", hotel: "ts", flight: "ts"};
+            return m[v] || "ts";
+        }
+
+        function render() {
+            const app = document.getElementById("app");
+            let html = `<div class="h"><h1>✈️ ${DATA.route}</h1><div class="r">越南 🇻🇳 | 馬來西亞 🇲🇾 | 泰國 🇹🇭</div><div class="d">📅 ${DATA.dates}</div></div>`;
+            html += `<div class="tb">`;
+            const tabs = [{k: "overview", l: "🏠總覽"}, {k: "days", l: "📅行程"}, {k: "info", l: "✈️航班"}, {k: "hotel", l: "🏨住宿"}, {k: "food", l: "🍜餐廳"}, {k: "check", l: "✅清單"}, {k: "voice", l: "🎧語音"}, {k: "tips", l: "💡技巧"}];
+            tabs.forEach(t => {
+                html += `<div class="t ${currentTab === t.k ? 'act' : ''}" onclick="setTab('${t.k}')">${t.l}</div>`;
+            });
+            html += `</div><div class="con">`;
+
+            if (currentTab === "overview") {
+                html += `<div class="st">🌐 快速辦理 Check-in</div>`;
+                DATA.checkin.forEach(c => {
+                    html += `<div class="rc" style="background:#E3F2FD"><div class="ri">💻</div><div class="icn"><div class="it">${c.a}</div><div class="is">點擊直接進入官網辦理 Check-in</div></div><a class="mb" href="${c.url}" target="_blank">GO</a></div>`;
+                });
+                html += `<div class="og">
+                    <div class="oi" onclick="setTab('info')"><span class="em">✈️</span><span class="lb">航班</span><span class="sb">${DATA.flights.length} 段飛行</span></div>
+                    <div class="oi" onclick="setTab('hotel')"><span class="em">🏨</span><span class="lb">住宿</span><span class="sb">${DATA.hotels.length} 個地點</span></div>
+                    <div class="oi" onclick="setTab('days')"><span class="em">📍</span><span class="lb">行程</span><span class="sb">3國跨境之旅</span></div>
+                    <div class="oi" onclick="setTab('food')"><span class="em">🍜</span><span class="lb">美食</span><span class="sb">${DATA.restaurants.length} 間推薦</span></div>
+                </div>`;
+                html += `<div class="st">🚨 緊急聯絡</div><div class="ec"><div class="et">緊急電話</div>`;
+                DATA.emergency.forEach(e => { html += `<div class="er"><span class="el">${e.l}</span><span>${e.v}</span></div>`; });
+                html += `</div><div class="st">💡 旅途貼士</div>`;
+                DATA.tips.forEach(tip => { html += `<div class="ic"><div class="ir"><div class="ii bt">💡</div><div class="icn"><div class="it">${tip}</div></div></div></div>`; });
+            } else if (currentTab === "days") {
+                DATA.days.forEach((d, di) => {
+                    html += `<div class="dc"><div class="dh"><span>${d.ti}</span><span class="ct">${d.ci}</span></div>`;
+                    d.ss.forEach((s, si) => {
+                        const spkId = `d${di}s${si}`;
+                        const spkCls = `mb spk ${playingId === spkId ? 'playing' : ''}`;
+                        html += `<div class="si"><div class="tc">${s.tm}</div><div class="ac"><span class="tg ${ctL(s.tg)}">${tgL(s.tg)}</span>${s.ac}</div><button class="${spkCls}" onclick="speak('${s.ac}','zh','${spkId}')">🎧</button>${s.p ? `<a class="mb" href="${gm(s.p)}" target="_blank">📍</a>` : ''}</div>`;
+                    });
+                    html += `</div>`;
+                });
+            } else if (currentTab === "info") {
+                html += `<div class="st">✈️ 航班詳情</div>`;
+                DATA.flights.forEach(f => {
+                    html += `<div class="ic"><div class="ir"><div class="ii bf">✈️</div><div class="icn"><div class="it">${f.a} ${f.f}</div><div class="is">${f.r} | ${f.d}</div></div><a class="mb" href="${gm(f.p)}" target="_blank">📍</a></div></div>`;
+                });
+            } else if (currentTab === "hotel") {
+                html += `<div class="st">🏨 住宿清單</div>`;
+                DATA.hotels.forEach(h => {
+                    html += `<div class="ic"><div class="ir"><div class="ii bh">🏨</div><div class="icn"><div class="it">${h.n}</div><div class="is">${h.c} | ${h.ds}<br>📞 ${h.ph}</div></div><a class="mb" href="${gm(h.p)}" target="_blank">📍</a></div></div>`;
+                });
+            } else if (currentTab === "food") {
+                DATA.restaurants.forEach(r => {
+                    html += `<div class="rc"><div class="ri">🟢</div><div class="icn"><div class="it">${r.n} <span style="font-size:11px;color:#888">(${r.t})</span></div><div class="is">${r.c} | ${r.d}</div></div><a class="mb" href="${gm(r.p)}" target="_blank">📍</a></div>`;
+                });
+                html += `<div class="ic" style="margin-top:15px"><div class="ir"><div class="ii bt">💡</div><div class="icn"><div class="it">素食溝通指南</div><div class="is">🇻🇳 越南: "Tôi ăn chay"<br>🇲🇾 馬來: "Saya makan vegetarian"<br>🇹🇭 泰國: "Gin Jay (齋)"</div></div></div></div>`;
+            } else if (currentTab === "check") {
+                DATA.checklist.forEach((item, idx) => {
+                    html += `<div class="cb" onclick="this.classList.toggle('done'); this.querySelector('.bx').innerText=this.classList.contains('done')?'✓':''"><div class="bx"></div>${item}</div>`;
+                });
+            } else if (currentTab === "voice") {
+                const la = [{id:"vi", n:"越南語", emoji:"🇻🇳"}, {id:"ms", n:"馬來語", emoji:"🇲🇾"}, {id:"th", n:"泰語", emoji:"🇹🇭"}];
+                la.forEach(l => {
+                    html += `<div class="st">🗣️ ${l.n} (+English)</div><div class="ph"><div class="phh">${l.emoji} ${l.n} <span class="lb">點擊朗讀</span></div><div class="phs">`;
+                    VOICE[l.id].greetings.forEach((v, i) => {
+                        const vid = `${l.id}g${i}`;
+                        const txt = (l.id==='vi'?v.vi:(l.id==='ms'?v.ms:v.th));
+                        html += `<button class="pbc ${playingId===vid?'playing':''}" onclick="speak('${txt}','${l.id}','${vid}')">🎧 ${v.zh}<br><span style="font-size:10px;opacity:0.8">${v.en} | ${v.pr}</span></button>`;
+                    });
+                    html += `</div></div>`;
+                    html += `<div class="ph" style="margin-top:8px"><div class="phh" style="background:#C0392B">🚨 緊急用語</div><div class="phs">`;
+                    VOICE[l.id].emergency.forEach((e, i) => {
+                        const eid = `${l.id}e${i}`;
+                        const etx = (l.id==='vi'?e.vi:(l.id==='ms'?e.ms:e.th));
+                        html += `<button class="pbc alt ${playingId===eid?'playing':''}" onclick="speak('${etx}','${l.id}','${eid}')">🎧 ${e.zh}<br><span style="font-size:10px;opacity:0.8">${e.en} | ${e.pr}</span></button>`;
+                    });
+                    html += `</div></div>`;
+                });
+            } else if (currentTab === "tips") {
+                DATA.tips.forEach(tip => {
+                    html += `<div class="ic"><div class="ir"><div class="ii bt">💡</div><div class="icn"><div class="it">${tip}</div></div></div></div>`;
+                });
+                html += `<div class="st">🚨 緊急電話</div><div class="ec"><div class="et">緊急聯絡</div>`;
+                DATA.emergency.forEach(e => { html += `<div class="er"><span class="el">${e.l}</span><span>${e.v}</span></div>`; });
+                html += `</div>`;
+            }
+            html += `</div><div style="text-align:center;padding:20px;font-size:11px;color:#AAA">SEA Elite Trip 2026 | Designed by RA1</div>`;
+            app.innerHTML = html;
+        }
+
+        window.setTab = (tab) => { currentTab = tab; render(); window.scrollTo(0,0); };
+        render();
+    </script>
+</body>
+</html>

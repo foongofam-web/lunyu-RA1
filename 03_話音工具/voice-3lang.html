@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🌍 三語旅遊詞典 Voice Phrasebook</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0a0a18;
+  --card:#12122a;
+  --border:#1e1e40;
+  --zh:#FF6B6B;
+  --en:#4ECDC4;
+  --vi:#FFE66D;
+  --gold:#FFD700;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:#e0e0f0;min-height:100vh;padding:14px;padding-bottom:90px}
+
+/* Header */
+.top{text-align:center;padding:10px 0 14px}
+.top h1{font-size:1.7em;color:var(--gold);margin-bottom:4px}
+.top p{color:#555;font-size:1em}
+
+/* Category tabs */
+.cat-tabs{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:16px}
+.cat-btn{padding:10px 16px;border-radius:22px;border:2px solid var(--border);background:var(--card);color:#777;font-size:1em;font-weight:bold;cursor:pointer;transition:all 0.2s}
+.cat-btn.act{border-color:var(--gold);color:var(--gold);background:rgba(255,215,0,0.1)}
+.cat-btn:active{opacity:0.7}
+
+/* Cards */
+.cards{margin-top:4px}
+.phrase-card{border-radius:16px;background:var(--card);border:2px solid var(--border);margin-bottom:10px;overflow:hidden}
+
+/* 3-column horizontal layout */
+.phrase-row{display:flex}
+.phrase-row .lrow{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:16px 8px;
+  border-right:1px solid var(--border);
+  cursor:pointer;
+  transition:background 0.12s;
+  text-align:center;
+  gap:6px;
+}
+.phrase-row .lrow:last-child{border-right:none}
+.phrase-row .lrow:active{background:#1c1c38}
+
+.phrase-row .lrow .lbl{
+  font-size:0.85em;
+  font-weight:bold;
+  padding:4px 10px;
+  border-radius:8px;
+  flex-shrink:0;
+}
+.phrase-row .lrow.zh .lbl{background:var(--zh);color:#fff}
+.phrase-row .lrow.en .lbl{background:var(--en);color:#000}
+.phrase-row .lrow.vi .lbl{background:var(--vi);color:#000}
+
+.phrase-row .lrow .tx{
+  font-size:1.1em;
+  line-height:1.25;
+  flex:1;
+  word-break:break-word;
+}
+
+.phrase-row .lrow .pl{
+  font-size:1.4em;
+  color:var(--gold);
+  background:#222244;
+  border-radius:10px;
+  padding:6px 12px;
+  flex-shrink:0;
+}
+.phrase-row .lrow .pl:active{background:#383860}
+
+footer{text-align:center;color:#2a2a4a;font-size:0.8em;margin-top:24px}
+</style>
+</head>
+<body>
+<div class="top">
+<h1>🌍 三語旅遊詞典</h1>
+<p>Tourist Phrasebook — 中 / 英 / 越</p>
+</div>
+
+<div class="cat-tabs" id="catTabs"></div>
+<div class="cards" id="cards"></div>
+<footer>小一 Voice Phrasebook</footer>
+
+<script>
+// ── Categories ──
+var CATS=[
+  {k:"all",   zh:"全部",    en:"All"},
+  {k:"greet", zh:"問候",    en:"Greetings"},
+  {k:"food",  zh:"餐廳素食", en:"Food"},
+  {k:"tran",  zh:"乘車交通", en:"Transport"},
+  {k:"shop",  zh:"購物價格", en:"Shopping"},
+  {k:"num",   zh:"數字時間", en:"Numbers"},
+  {k:"emer",  zh:"緊急",    en:"Emergency"},
+  {k:"cour",  zh:"禮貌",    en:"Courtesies"},
+  {k:"heal",  zh:"健康",    en:"Health"}
+];
+
+var PHRASES={
+  greet:[
+    {zh:"你好",en:"Hello",vi:"Xin chào"},
+    {zh:"早安",en:"Good morning",vi:"Chào buổi sáng"},
+    {zh:"午安",en:"Good afternoon",vi:"Chào buổi trưa"},
+    {zh:"晚安",en:"Good night",vi:"Chào buổi tối"},
+    {zh:"謝謝",en:"Thank you",vi:"Cảm ơn"},
+    {zh:"非常謝謝",en:"Thank you very much",vi:"Cảm ơn nhiều"},
+    {zh:"不客氣",en:"You're welcome",vi:"Không có gì"},
+    {zh:"請",en:"Please",vi:"Xin vui lòng"},
+    {zh:"對不起",en:"Sorry",vi:"Xin lỗi"},
+    {zh:"沒關係",en:"It's okay / Don't worry",vi:"Không sao"},
+    {zh:"再見",en:"Goodbye",vi:"Tạm biệt"},
+    {zh:"是",en:"Yes",vi:"Vâng / Có"},
+    {zh:"不是",en:"No",vi:"Không"},
+    {zh:"好",en:"OK / Good",vi:"Được / Tốt"},
+    {zh:"不好",en:"Not good",vi:"Không tốt"}
+  ],
+  food:[
+    {zh:"我是素食者",en:"I am vegetarian",vi:"Tôi ăn chay"},
+    {zh:"請不要魚露",en:"No fish sauce please",vi:"Không nước mắm"},
+    {zh:"有素食選項嗎？",en:"Do you have vegetarian options?",vi:"Có đồ chay không?"},
+    {zh:"不要蔥蒜",en:"No onions or garlic please",vi:"Không hành tỏi"},
+    {zh:"不要肉",en:"I don't want meat",vi:"Tôi không muốn thịt"},
+    {zh:"我對某些食物過敏",en:"I have food allergies",vi:"Tôi bị dị ứng thực phẩm"},
+    {zh:"太好吃了！",en:"Very delicious!",vi:"Ngon quá!"},
+    {zh:"好吃",en:"Delicious",vi:"Ngon"},
+    {zh:"不好吃",en:"Not tasty",vi:"Không ngon"},
+    {zh:"請少辣",en:"Less spicy please",vi:"Ít cay thôi"},
+    {zh:"不要辣",en:"No spicy please",vi:"Không cay"},
+    {zh:"普通辣",en:"Normal spicy",vi:"Bình thường"},
+    {zh:"有辣嗎？",en:"Is it spicy?",vi:"Có cay không?"},
+    {zh:"請給我一杯水",en:"Please give me a glass of water",vi:"Cho tôi một ly nước"},
+    {zh:"請給我冰水",en:"Please give me iced water",vi:"Cho tôi một ly nước đá"},
+    {zh:"請給我熱茶",en:"Please give me hot tea",vi:"Cho tôi một ly trà nóng"},
+    {zh:"我可以看看菜單嗎？",en:"Can I see the menu?",vi:"Cho tôi xem thực đơn"},
+    {zh:"有英文菜單嗎？",en:"Do you have an English menu?",vi:"Có thực đơn tiếng Anh không?"},
+    {zh:"我要這個",en:"I want this one",vi:"Tôi muốn cái này"},
+    {zh:"我要 ordering",en:"I want to order",vi:"Tôi muốn gọi món"},
+    {zh:"結帳",en:"Check, please",vi:"Tính tiền"},
+    {zh:"多少錢？",en:"How much?",vi:"Bao nhiêu tiền?"},
+    {zh:"可以刷卡嗎？",en:"Can I pay by card?",vi:"Có thể quẹt thẻ không?"},
+    {zh:"有收據嗎？",en:"Do you have a receipt?",vi:"Có hóa đơn không?"},
+    {zh:"很好吃，謝謝",en:"Very tasty, thank you",vi:"Ngon lắm, cảm ơn"},
+    {zh:"這個是什麼？",en:"What is this?",vi:"Cái này là gì?"},
+    {zh:"有湯嗎？",en:"Do you have soup?",vi:"Có canh không?"},
+    {zh:"有米飯嗎？",en:"Do you have rice?",vi:"Có cơm không?"},
+    {zh:"有麵包嗎？",en:"Do you have bread?",vi:"Có bánh mì không?"},
+    {zh:"有水果嗎？",en:"Do you have fruit?",vi:"Có trái cây không?"},
+    {zh:"我要外賣",en:"I want takeaway",vi:"Tôi muốn mang về"},
+    {zh:"我在這裡吃",en:"I eat here",vi:"Tôi ăn ở đây"}
+  ],
+  tran:[
+    {zh:"我要叫計程車",en:"I want to call a taxi",vi:"Tôi muốn gọi taxi"},
+    {zh:"到這個地址",en:"To this address",vi:"Đến địa chỉ này"},
+    {zh:"到機場",en:"To the airport",vi:"Đến sân bay"},
+    {zh:"到火車站",en:"To the train station",vi:"Đến nhà ga"},
+    {zh:"到巴士站",en:"To the bus stop",vi:"Đến trạm xe buýt"},
+    {zh:"多少錢？",en:"How much?",vi:"Bao nhiêu tiền?"},
+    {zh:"太貴了",en:"Too expensive",vi:"Đắt quá"},
+    {zh:"便宜一點？",en:"Can you lower the price?",vi:"Giảm giá được không?"},
+    {zh:"請開收據",en:"Please give me a receipt",vi:"Cho tôi xin hóa đơn"},
+    {zh:"停在這裡",en:"Stop here please",vi:"Dừng ở đây"},
+    {zh:"等我一下",en:"Wait for me a moment",vi:"Đợi tôi một chút"},
+    {zh:"我要下去",en:"I want to get off",vi:"Tôi muốn xuống"},
+    {zh:"請帶我去這裡",en:"Please take me here",vi:"Xin đưa tôi đến đây"},
+    {zh:"機場怎麼走？",en:"How to get to the airport?",vi:"Đi sân bay như thế nào?"},
+    {zh:"火車站在哪裡？",en:"Where is the train station?",vi:"Nhà ga ở đâu?"},
+    {zh:"我在找巴士站",en:"I'm looking for the bus stop",vi:"Tôi đang tìm trạm xe buýt"},
+    {zh:"這輛車到市中心嗎？",en:"Does this go to the city center?",vi:"Xe này đến trung tâm thành phố không?"},
+    {zh:"下一站是哪裡？",en:"What is the next stop?",vi:"Trạm kế tiếp là gì?"},
+    {zh:"我迷路了",en:"I am lost",vi:"Tôi bị lạc đường"},
+    {zh:"請問路",en:"Can you show me the way?",vi:"Xin chỉ đường"},
+    {zh:"往左走",en:"Go left",vi:"Rẽ trái"},
+    {zh:"往右走",en:"Go right",vi:"Rẽ phải"},
+    {zh:"直走",en:"Go straight",vi:"Đi thẳng"},
+    {zh:"在路口轉彎",en:"Turn at the corner",vi:"Rẽ ở góc đường"},
+    {zh:"飯店在哪裡？",en:"Where is the hotel?",vi:"Khách sạn ở đâu?"},
+    {zh:"我在找飯店",en:"I'm looking for the hotel",vi:"Tôi đang tìm khách sạn"},
+    {zh:"遠嗎？",en:"Is it far?",vi:"Có xa không?"},
+    {zh:"近嗎？",en:"Is it near?",vi:"Có gần không?"},
+    {zh:"要多久？",en:"How long does it take?",vi:"Mất bao lâu?"}
+  ],
+  shop:[
+    {zh:"多少錢？",en:"How much?",vi:"Bao nhiêu tiền?"},
+    {zh:"這個多少錢？",en:"How much is this?",vi:"Cái này bao nhiêu?"},
+    {zh:"太貴了",en:"Too expensive",vi:"Đắt quá"},
+    {zh:"便宜一點？",en:"Can you lower the price?",vi:"Giảm giá được không?"},
+    {zh:"有優惠嗎？",en:"Any discount?",vi:"Có giảm giá không?"},
+    {zh:"我要這個",en:"I want this one",vi:"Tôi muốn cái này"},
+    {zh:"不需要了，謝謝",en:"No thanks",vi:"Không cần, cảm ơn"},
+    {zh:"可以刷卡嗎？",en:"Can I pay by card?",vi:"Có thể quẹt thẻ không?"},
+    {zh:"我在看看而已",en:"I'm just looking",vi:"Tôi chỉ xem thôi"},
+    {zh:"有其他顏色嗎？",en:"Other colors?",vi:"Có màu khác không?"},
+    {zh:"有大一點的嗎？",en:"Do you have a bigger size?",vi:"Có cỡ lớn hơn không?"},
+    {zh:"有小一點的嗎？",en:"Do you have a smaller size?",vi:"Có cỡ nhỏ hơn không?"},
+    {zh:"有現貨嗎？",en:"Is it in stock?",vi:"Còn hàng không?"},
+    {zh:"可以退貨嗎？",en:"Can I return it?",vi:"Có thể trả lại không?"},
+    {zh:"有保養嗎？",en:"Is there a warranty?",vi:"Có bảo hành không?"},
+    {zh:"我在哪裡可以買SIM卡？",en:"Where can I buy a SIM card?",vi:"Tôi mua SIM ở đâu?"},
+    {zh:"我在哪裡可以換錢？",en:"Where can I exchange money?",vi:"Tôi đổi tiền ở đâu?"}
+  ],
+  num:[
+    {zh:"零",en:"Zero",vi:"Không"},
+    {zh:"一",en:"One",vi:"Một"},
+    {zh:"二",en:"Two",vi:"Hai"},
+    {zh:"三",en:"Three",vi:"Ba"},
+    {zh:"四",en:"Four",vi:"Bốn"},
+    {zh:"五",en:"Five",vi:"Năm"},
+    {zh:"六",en:"Six",vi:"Sáu"},
+    {zh:"七",en:"Seven",vi:"Bảy"},
+    {zh:"八",en:"Eight",vi:"Tám"},
+    {zh:"九",en:"Nine",vi:"Chín"},
+    {zh:"十",en:"Ten",vi:"Mười"},
+    {zh:"十一",en:"Eleven",vi:"Mười một"},
+    {zh:"十二",en:"Twelve",vi:"Mười hai"},
+    {zh:"二十",en:"Twenty",vi:"Hai mươi"},
+    {zh:"一百",en:"One hundred",vi:"Một trăm"},
+    {zh:"一千",en:"One thousand",vi:"Một nghìn"},
+    {zh:"一萬",en:"Ten thousand",vi:"Mười nghìn"},
+    {zh:"第一",en:"First",vi:"Thứ nhất"},
+    {zh:"第二",en:"Second",vi:"Thứ hai"},
+    {zh:"第三",en:"Third",vi:"Thứ ba"},
+    {zh:"現在幾點？",en:"What time is it now?",vi:"Bây giờ mấy giờ?"},
+    {zh:"早上",en:"Morning",vi:"Buổi sáng"},
+    {zh:"下午",en:"Afternoon",vi:"Buổi chiều"},
+    {zh:"晚上",en:"Evening / Night",vi:"Buổi tối"},
+    {zh:"今天",en:"Today",vi:"Hôm nay"},
+    {zh:"明天",en:"Tomorrow",vi:"Ngày mai"},
+    {zh:"昨天",en:"Yesterday",vi:"Hôm qua"},
+    {zh:"星期一",en:"Monday",vi:"Thứ hai"},
+    {zh:"星期二",en:"Tuesday",vi:"Thứ ba"},
+    {zh:"星期三",en:"Wednesday",vi:"Thứ tư"},
+    {zh:"星期四",en:"Thursday",vi:"Thứ năm"},
+    {zh:"星期五",en:"Friday",vi:"Thứ sáu"},
+    {zh:"星期六",en:"Saturday",vi:"Thứ bảy"},
+    {zh:"星期日",en:"Sunday",vi:"Chủ nhật"}
+  ],
+  emer:[
+    {zh:"救命！",en:"Help!",vi:"Cứu tôi!"},
+    {zh:"報警！",en:"Call the police!",vi:"Gọi cảnh sát!"},
+    {zh:"我叫救護車",en:"Call an ambulance",vi:"Gọi xe cấp cứu"},
+    {zh:"火警！",en:"Fire!",vi:"Có cháy!"},
+    {zh:"我不舒服",en:"I feel unwell",vi:"Tôi không khỏe"},
+    {zh:"我受傷了",en:"I am injured",vi:"Tôi bị thương"},
+    {zh:"我叫大使館",en:"I need to call the embassy",vi:"Tôi cần gọi đại sứ quán"},
+    {zh:"有人跟蹤我",en:"Someone is following me",vi:"Có người đang theo dõi tôi"},
+    {zh:"我的護照被偷了",en:"My passport was stolen",vi:"Hộ chiếu tôi bị mất"},
+    {zh:"我需要幫助",en:"I need help",vi:"Tôi cần giúp đỡ"},
+    {zh:"我丟了錢包",en:"I lost my wallet",vi:"Tôi mất ví tiền"},
+    {zh:"我找不到我的酒店",en:"I can't find my hotel",vi:"Tôi không tìm được khách sạn"}
+  ],
+  cour:[
+    {zh:"請問可以幫忙嗎？",en:"Can you help me please?",vi:"Xin hỏi bạn có thể giúp tôi không?"},
+    {zh:"打擾了",en:"Excuse me",vi:"Xin lỗi"},
+    {zh:"抱歉",en:"I apologize",vi:"Xin lỗi"},
+    {zh:"祝你有美好的一天",en:"Have a nice day",vi:"Chúc bạn một ngày tốt lành"},
+    {zh:"恭喜",en:"Congratulations",vi:"Chúc mừng"},
+    {zh:"生日快樂",en:"Happy birthday",vi:"Chúc mừng sinh nhật"},
+    {zh:"新年快樂",en:"Happy New Year",vi:"Chúc mừng năm mới"},
+    {zh:"旅途愉快",en:"Have a good trip",vi:"Chúc bạn có một chuyến đi tốt đẹp"},
+    {zh:"你會說英文嗎？",en:"Can you speak English?",vi:"Bạn có nói tiếng Anh không?"},
+    {zh:"我不會說越南文",en:"I don't speak Vietnamese",vi:"Tôi không nói được tiếng Việt"},
+    {zh:"請說慢一點",en:"Please speak more slowly",vi:"Xin nói chậm hơn"},
+    {zh:"請再說一次",en:"Please say it again",vi:"Xin nói lại lần nữa"}
+  ],
+  heal:[
+    {zh:"我頭疼",en:"I have a headache",vi:"Tôi bị đau đầu"},
+    {zh:"我胃疼",en:"I have a stomachache",vi:"Tôi bị đau bụng"},
+    {zh:"我發燒了",en:"I have a fever",vi:"Tôi bị sốt"},
+    {zh:"我咳嗽",en:"I have a cough",vi:"Tôi bị ho"},
+    {zh:"我腹瀉",en:"I have diarrhea",vi:"Tôi bị tiêu chảy"},
+    {zh:"我過敏了",en:"I have an allergic reaction",vi:"Tôi bị dị ứng"},
+    {zh:"我需要藥",en:"I need medicine",vi:"Tôi cần thuốc"},
+    {zh:"我在哪裡可以找到藥房？",en:"Where can I find a pharmacy?",vi:"Tôi tìm nhà thuốc ở đâu?"},
+    {zh:"請叫醫生",en:"Please call a doctor",vi:"Xin gọi bác sĩ"},
+    {zh:"我叫醫院",en:"I need to go to the hospital",vi:"Tôi cần đi bệnh viện"},
+    {zh:"我保險",en:"I have insurance",vi:"Tôi có bảo hiểm"},
+    {zh:"多少錢？",en:"How much?",vi:"Bao nhiêu tiền?"}
+  ]
+};
+
+// ── Helpers ──
+var VOICES=[];
+var CUR_CAT="all";
+
+function loadVoices(){
+  var v=window.speechSynthesis.getVoices();
+  if(v.length>0){VOICES=v;return;}
+  window.speechSynthesis.onvoiceschanged=function(){VOICES=window.speechSynthesis.getVoices();};
+  setTimeout(function(){VOICES=window.speechSynthesis.getVoices();},800);
+}
+
+function spk(text,lang){
+  if(!text||!window.speechSynthesis)return;
+  window.speechSynthesis.cancel();
+  var u=new SpeechSynthesisUtterance(text);
+  u.lang=lang==="vi"?"vi-VN":lang==="en"?"en-US":"zh-TW";
+  u.rate=0.82;
+  if(VOICES.length===0)VOICES=window.speechSynthesis.getVoices();
+  var vl=lang==="vi"?"vi":lang==="en"?"en":"zh";
+  var pref=VOICES.filter(function(v){return v.lang.startsWith(vl);});
+  if(pref.length>0){
+    var nat=pref.find(function(v){return v.localService||v.name.includes("Enhanced");});
+    u.voice=nat||pref[0];
+  }
+  window.speechSynthesis.speak(u);
+}
+
+// One phrase = one card with 3 blocks side by side
+function mkCard(p){
+  var html='<div class="phrase-card">';
+  html+='<div class="phrase-row">';
+  html+='<div class="lrow zh" onclick="spk(\''+p.zh.replace(/'/g,"\\'")+'\',\'zh\')">';
+  html+='<span class="lbl">🇨🇳 中</span>';
+  html+='<span class="tx">'+p.zh+'</span>';
+  html+='<span class="pl">▶</span>';
+  html+='</div>';
+  html+='<div class="lrow en" onclick="spk(\''+p.en.replace(/'/g,"\\'")+'\',\'en\')">';
+  html+='<span class="lbl">🇺🇸 EN</span>';
+  html+='<span class="tx">'+p.en+'</span>';
+  html+='<span class="pl">▶</span>';
+  html+='</div>';
+  html+='<div class="lrow vi" onclick="spk(\''+p.vi.replace(/'/g,"\\'")+'\',\'vi\')">';
+  html+='<span class="lbl">🇻🇳 VN</span>';
+  html+='<span class="tx">'+p.vi+'</span>';
+  html+='<span class="pl">▶</span>';
+  html+='</div>';
+  html+='</div></div>';
+  return html;
+}
+
+function renderCats(){
+  var html="";
+  for(var i=0;i<CATS.length;i++){
+    var c=CATS[i];
+    html+='<button class="cat-btn'+(c.k===CUR_CAT?" act":"")+'" onclick="setCat(\''+c.k+'\')">'+c.zh+'</button>';
+  }
+  document.getElementById("catTabs").innerHTML=html;
+}
+
+function render(){
+  var html="";
+  var keys=CUR_CAT==="all"?Object.keys(PHRASES):[CUR_CAT];
+  for(var ki=0;ki<keys.length;ki++){
+    var cat=PHRASES[keys[ki]];
+    for(var i=0;i<cat.length;i++){
+      html+=mkCard(cat[i]);
+    }
+  }
+  document.getElementById("cards").innerHTML=html;
+}
+
+function setCat(k){
+  CUR_CAT=k;
+  renderCats();
+  render();
+}
+
+loadVoices();
+renderCats();
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🎤 即時語音翻譯 Voice Interpreter</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0a0a18;
+  --card:#12122a;
+  --border:#1e1e40;
+  --zh:#FF6B6B;
+  --en:#4ECDC4;
+  --vi:#FFE66D;
+  --gold:#FFD700;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:#e0e0f0;min-height:100vh;display:flex;flex-direction:column;padding:0;padding-bottom:85px}
+.top{padding:16px 16px 10px;text-align:center;background:linear-gradient(180deg,#12122a 0%,transparent 100%)}
+.top h1{font-size:1.8em;color:var(--gold);margin-bottom:4px}
+.top p{color:#555;font-size:1em}
+
+/* Lang selector */
+.lang-row{display:flex;align-items:center;justify-content:center;gap:12px;margin:14px 0 16px}
+.lang-row select{padding:14px 16px;border-radius:14px;border:3px solid var(--border);background:var(--card);color:var(--gold);font-size:1.1em;cursor:pointer;appearance:none;-webkit-appearance:none;min-width:150px;text-align:center}
+.lang-row select:focus{outline:none;border-color:var(--gold)}
+.arrow{font-size:2em;color:var(--gold);flex-shrink:0}
+
+/* Mic zone */
+.mic-zone{display:flex;flex-direction:column;align-items:center;gap:16px;margin:8px 0 22px}
+.mic-btn{width:130px;height:130px;border-radius:50%;border:4px solid var(--border);background:linear-gradient(145deg,#1a1a35,#101025);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s}
+.mic-btn.rec{border-color:#FF4444;background:linear-gradient(145deg,#2a1020,#1a0a15);animation:pulse 1.4s infinite}
+.mic-btn.rec svg{fill:#FF4444;filter:drop-shadow(0 0 10px #FF4444)}
+.mic-btn svg{width:54px;height:54px;fill:#888;transition:fill 0.2s}
+.mic-btn:hover svg{fill:var(--gold)}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,68,68,0.4)}50%{box-shadow:0 0 0 20px rgba(255,68,68,0)}}
+.mic-label{font-size:1.05em;color:#666;text-align:center}
+.mic-label.rec{color:#FF4444;font-weight:bold}
+
+/* Transcript + result */
+.box{background:var(--card);border:3px solid var(--border);border-radius:18px;margin:0 16px 14px;padding:18px}
+.box .lbl{font-size:0.95em;color:#555;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.ltag{padding:5px 12px;border-radius:8px;font-size:0.9em;font-weight:bold}
+.ltag.zh{background:var(--zh);color:#fff}
+.ltag.en{background:var(--en);color:#000}
+.ltag.vi{background:var(--vi);color:#000}
+.msg{font-size:1.4em;line-height:1.6;min-height:32px;word-break:break-word}
+.msg.empty{color:#333;font-style:italic}
+.msg.src{color:#ccc}
+.msg.rst{color:var(--gold);font-weight:500}
+.msg.err{color:#FF6B6B;font-size:1.1em}
+.msg.offline{color:#FFAA44;font-size:1.1em}
+
+/* Spinner */
+.spinner{margin:10px auto;width:26px;height:26px;border:3px solid #222;border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Options */
+.opts{display:flex;justify-content:center;gap:14px;margin:0 16px 14px;align-items:center}
+.toggle{padding:12px 20px;border-radius:12px;border:3px solid var(--border);background:var(--card);color:#777;font-size:1em;cursor:pointer;transition:all 0.2s}
+.toggle.on{border-color:var(--gold);color:var(--gold);background:rgba(255,215,0,0.08)}
+
+.speak-btn{display:block;width:calc(100% - 32px);margin:0 auto 18px;padding:18px;border-radius:16px;border:none;font-size:1.2em;font-weight:bold;cursor:pointer;background:linear-gradient(135deg,#FF6B6B,#FF8E53);color:#fff;transition:opacity 0.2s}
+.speak-btn:disabled{opacity:0.35;cursor:not-allowed}
+.speak-btn:active:not(:disabled){opacity:0.8}
+
+/* Quick phrases */
+.quick{margin:0 16px 18px}
+.quick-h{font-size:0.95em;color:#555;margin-bottom:10px;padding-left:2px}
+.ql{display:flex;flex-wrap:wrap;gap:10px}
+.qtag{padding:12px 16px;background:var(--card);border:2px solid var(--border);border-radius:12px;font-size:1em;color:#aaa;cursor:pointer;transition:all 0.15s}
+.qtag:active{border-color:var(--gold);color:var(--gold)}
+
+/* Status */
+footer{text-align:center;color:#2a2a4a;font-size:0.85em;margin-top:auto;padding:14px 0}
+</style>
+</head>
+<body>
+<div class="top">
+<h1>🎤 即時語音翻譯</h1>
+<p>Voice Interpreter — 說任何句子 即時翻譯</p>
+</div>
+
+<div class="lang-row">
+<select id="fromLang">
+<option value="zh-CN">🇨🇳 中文</option>
+<option value="en">🇺🇸 英文</option>
+<option value="vi">🇻🇳 越南文</option>
+</select>
+<span class="arrow">→</span>
+<select id="toLang">
+<option value="vi">🇻🇳 越南文</option>
+<option value="en">🇺🇸 英文</option>
+<option value="zh-CN">🇨🇳 中文</option>
+</select>
+</div>
+
+<div class="mic-zone">
+<button class="mic-btn" id="micBtn" onclick="toggleRec()">
+<svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+</button>
+<div class="mic-label" id="micLabel">點擊麥克風開始說話</div>
+</div>
+
+<div class="box">
+<div class="lbl">
+<span>你說的：</span>
+<span class="ltag" id="fromTag">中文</span>
+</div>
+<div class="msg empty" id="ttext">— 等待說話 —</div>
+</div>
+
+<div class="box">
+<div class="lbl">
+<span>翻譯結果：</span>
+<span class="ltag" id="toTag">越南文</span>
+</div>
+<div class="msg empty" id="otext">— 等待翻譯 —</div>
+</div>
+
+<div class="opts">
+<button class="toggle on" id="autoBtn" onclick="toggleAuto()">🔊 自動朗讀</button>
+<button class="toggle" id="offlineBtn" onclick="toggleOffline()">📴 離線優先</button>
+</div>
+
+<button class="speak-btn" id="speakBtn" onclick="speakOut()" disabled>▶ 朗讀譯文</button>
+
+<div class="quick">
+<div class="quick-h">💡 常用翻譯（點擊測試）</div>
+<div class="ql">
+<div class="qtag" onclick="test('zh-CN','vi','我是素食者')">🇨🇳→🇻🇳 素食者</div>
+<div class="qtag" onclick="test('zh-CN','en','請不要魚露')">🇨🇳→🇺🇸 不要魚露</div>
+<div class="qtag" onclick="test('vi','zh-CN','Tôi ăn chay')">🇻🇳→🇨🇳 吃素</div>
+<div class="qtag" onclick="test('en','zh-CN','How much is this?')">🇺🇸→🇨🇳 多少錢</div>
+<div class="qtag" onclick="test('vi','en','Cứu tôi!')">🇻🇳→🇺🇸 救命</div>
+<div class="qtag" onclick="test('en','vi','I am lost')">🇺🇸→🇻🇳 迷路</div>
+</div>
+</div>
+
+<footer>支援 Chrome · Edge · Safari(iOS) · 翻譯：MyMemory API</footer>
+
+<script>
+// ── State ──
+var rec=null;
+var isRec=false;
+var transcript="";
+var translated="";
+var autoPlay=true;
+var offlineMode=false;
+var curFromLang="zh-CN";
+var curToLang="vi";
+
+// ── Offline mini dictionary ──
+var OFFLINE={
+  "zh-CN":{
+    "vi":{
+      "我是素食者":"Tôi ăn chay",
+      "請不要魚露":"Không nước mắm",
+      "多少錢":"Bao nhiêu tiền",
+      "謝謝":"Cảm ơn",
+      "你好":"Xin chào",
+      "救命":"Cứu tôi",
+      "我叫救護車":"Gọi xe cấp cứu",
+      "我迷路了":"Tôi bị lạc đường",
+      "太貴了":"Đắt quá",
+      "便宜一點":"Giảm giá được không",
+      "我要這個":"Tôi muốn cái này",
+      "不需要了":"Không cần",
+      "太好吃了":"Ngon quá",
+      "請少辣":"Ít cay thôi",
+      "有素食嗎":"Có đồ chay không",
+      "我不舒服":"Tôi không khỏe",
+      "廁所在哪裡":"Nhà vệ sinh ở đâu"
+    },
+    "en":{
+      "我是素食者":"I am vegetarian",
+      "請不要魚露":"No fish sauce please",
+      "多少錢":"How much",
+      "謝謝":"Thank you",
+      "你好":"Hello",
+      "救命":"Help",
+      "我叫救護車":"Call an ambulance",
+      "我迷路了":"I am lost",
+      "太貴了":"Too expensive",
+      "便宜一點":"Can you lower the price",
+      "我要這個":"I want this one",
+      "不需要了":"No thanks",
+      "太好吃了":"Very delicious",
+      "請少辣":"Less spicy please",
+      "有素食嗎":"Do you have vegetarian",
+      "我不舒服":"I feel unwell",
+      "廁所在哪裡":"Where is the restroom"
+    }
+  },
+  "en":{
+    "vi":{
+      "I am vegetarian":"Tôi ăn chay",
+      "how much":"Bao nhiêu tiền",
+      "thank you":"Cảm ơn",
+      "hello":"Xin chào",
+      "help":"Cứu tôi",
+      "call an ambulance":"Gọi xe cấp cứu",
+      "i am lost":"Tôi bị lạc đường",
+      "too expensive":"Đắt quá",
+      "i want this one":"Tôi muốn cái này",
+      "no thanks":"Không cần"
+    },
+    "zh-CN":{
+      "I am vegetarian":"我是素食者",
+      "how much":"多少錢",
+      "thank you":"謝謝",
+      "hello":"你好",
+      "help":"救命",
+      "i am lost":"我迷路了",
+      "too expensive":"太貴了"
+    }
+  },
+  "vi":{
+    "zh-CN":{
+      "Tôi ăn chay":"我是素食者",
+      "Không nước mắm":"請不要魚露",
+      "Bao nhiêu tiền":"多少錢",
+      "Cảm ơn":"謝謝",
+      "Xin chào":"你好",
+      "Cứu tôi":"救命",
+      "Gọi xe cấp cứu":"我叫救護車",
+      "Tôi bị lạc đường":"我迷路了",
+      "Đắt quá":"太貴了",
+      "Giảm giá được không":"便宜一點",
+      "Tôi muốn cái này":"我要這個",
+      "Không cần":"不需要了",
+      "Ngon quá":"太好吃了",
+      "Ít cay thôi":"請少辣",
+      "Có đồ chay không":"有素食嗎",
+      "Tôi không khỏe":"我不舒服",
+      "Nhà vệ sinh ở đâu":"廁所在哪裡"
+    },
+    "en":{
+      "Tôi ăn chay":"I am vegetarian",
+      "Không nước mắm":"No fish sauce please",
+      "Bao nhiêu tiền":"How much",
+      "Cảm ơn":"Thank you",
+      "Xin chào":"Hello",
+      "Cứu tôi":"Help",
+      "Gọi xe cấp cứu":"Call an ambulance",
+      "Tôi bị lạc đường":"I am lost",
+      "Đắt quá":"Too expensive"
+    }
+  }
+};
+
+// ── MyMemory Translation API ──
+var MYMEM_BASE="https://api.mymemory.translated.net/get?q={{text}}&langpair={{from}}|{{to}}";
+
+function doTranslate(text,from,to,cb){
+  // Try offline first
+  var off=OFFLINE[from];
+  if(off && off[to]){
+    var t=off[to][text.toLowerCase()];
+    if(t){cb(t,"offline");return;}
+  }
+
+  // Online API
+  var url=MYMEM_BASE.replace("{{text}}",encodeURIComponent(text))
+                    .replace("{{from}}",from)
+                    .replace("{{to}}",to);
+
+  var xhr=new XMLHttpRequest();
+  xhr.open("GET",url,true);
+  xhr.timeout=6000;
+  xhr.onload=function(){
+    if(xhr.status===200){
+      try{
+        var d=JSON.parse(xhr.responseText);
+        if(d.responseStatus===200 && d.responseData){
+          cb(d.responseData.translatedText,"online");
+          return;
+        }
+      }catch(e){}
+    }
+    cb(null,"error");
+  };
+  xhr.onerror=function(){cb(null,"error");};
+  xhr.ontimeout=function(){cb(null,"error");};
+  xhr.send();
+}
+
+function translateText(text,from,to,cb){
+  if(offlineMode){
+    var off=OFFLINE[from];
+    if(off && off[to]){
+      var t=off[to][text.toLowerCase()];
+      if(t){cb(t,"offline");return;}
+    }
+    cb(null,"offline_nomatch");return;
+  }
+  doTranslate(text,from,to,cb);
+}
+
+// ── UI helpers ──
+function getLangLabel(code){
+  if(code==="zh-CN")return "🇨🇳 中文";
+  if(code==="en")return "🇺🇸 英文";
+  if(code==="vi")return "🇻🇳 越南文";
+  return code;
+}
+
+function getLangTag(code){
+  if(code==="zh-CN")return "zh";
+  if(code==="en")return "en";
+  if(code==="vi")return "vi";
+  return "";
+}
+
+function getSpeakLang(code){
+  if(code==="zh-CN")return "zh-CN";
+  if(code==="en")return "en-US";
+  if(code==="vi")return "vi-VN";
+  return code;
+}
+
+function updateTags(){
+  var from=document.getElementById("fromLang").value;
+  var to=document.getElementById("toLang").value;
+  var ftag=document.getElementById("fromTag");
+  var ttag=document.getElementById("toTag");
+  ftag.textContent=getLangLabel(from).split(" ")[0]+" "+getLangLabel(from).split(" ")[1];
+  ftag.className="ltag "+getLangTag(from);
+  ttag.textContent=getLangLabel(to).split(" ")[0]+" "+getLangLabel(to).split(" ")[1];
+  ttag.className="ltag "+getLangTag(to);
+  curFromLang=from;
+  curToLang=to;
+}
+
+// ── Mic / Speech Recognition ──
+function toggleRec(){
+  if(isRec){stopRec();return;}
+  startRec();
+}
+
+function startRec(){
+  if(!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)){
+    setStatus("❌ 瀏覽器不支援語音，請用 Chrome");
+    return;
+  }
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  rec=new SR();
+  rec.lang=document.getElementById("fromLang").value;
+  rec.interimResults=false;
+  rec.continuous=true;
+
+  rec.onstart=function(){
+    isRec=true;
+    document.getElementById("micBtn").classList.add("rec");
+    document.getElementById("micLabel").classList.add("rec");
+    document.getElementById("micLabel").textContent="🔴 錄音中... 再按停止";
+    document.getElementById("ttext").classList.remove("empty");
+    document.getElementById("otext").classList.remove("empty");
+    document.getElementById("otext").innerHTML='<div class="spinner"></div>';
+    transcript="";
+  };
+
+  rec.onresult=function(event){
+    var result=event.results[event.results.length-1];
+    if(result.isFinal){
+      transcript=result[0].transcript.trim();
+      document.getElementById("ttext").textContent=transcript;
+      document.getElementById("ttext").classList.remove("empty");
+      translateNow(transcript);
+    }
+  };
+
+  rec.onerror=function(event){
+    if(event.error==="no-speech")return;
+    setStatus("❌ 錯誤："+event.error);
+    stopRec();
+  };
+
+  rec.onend=function(){
+    isRec=false;
+    var btn=document.getElementById("micBtn");
+    if(btn)btn.classList.remove("rec");
+    var lbl=document.getElementById("micLabel");
+    if(lbl){lbl.classList.remove("rec");lbl.textContent="點擊麥克風開始說話";}
+    if(transcript){
+      var lbl2=document.getElementById("micLabel");
+      if(lbl2)lbl2.textContent="🔄 翻譯完成，再按重新開始";
+    }
+  };
+
+  rec.start();
+}
+
+function stopRec(){
+  if(rec)rec.stop();
+}
+
+function translateNow(text){
+  var from=document.getElementById("fromLang").value;
+  var to=document.getElementById("toLang").value;
+  var el=document.getElementById("otext");
+  el.innerHTML='<div class="spinner"></div><span style="color:#555;font-size:0.85em"> 翻譯中...</span>';
+
+  translateText(text,from,to,function(result,flag){
+    if(result){
+      el.textContent=result;
+      el.classList.remove("empty");
+      if(flag==="offline"){
+        el.classList.remove("err");
+      }else{
+        el.classList.remove("err");
+      }
+      translated=result;
+      document.getElementById("speakBtn").disabled=false;
+      if(autoPlay)speakOut();
+    }else{
+      if(flag==="offline_nomatch"||flag==="offline"){
+        el.innerHTML='<span class="msg offline">📴 離線模式：詞庫無此句，請連線使用線上翻譯</span>';
+        el.classList.remove("empty");
+      }else{
+        el.innerHTML='<span class="msg err">⚠️ 翻譯失敗，請稍后再試</span>';
+        el.classList.remove("empty");
+      }
+      translated="";
+      document.getElementById("speakBtn").disabled=true;
+    }
+  });
+}
+
+function setStatus(msg){
+  var el=document.getElementById("otext");
+  if(el)el.innerHTML='<span class="msg" style="color:#666">'+msg+'</span>';
+}
+
+// ── TTS ──
+var VOICES=[];
+function loadVoices(){
+  VOICES=window.speechSynthesis.getVoices();
+  if(VOICES.length===0)window.speechSynthesis.getVoices();
+  window.speechSynthesis.onvoiceschanged=function(){VOICES=window.speechSynthesis.getVoices();};
+}
+loadVoices();
+
+function speakOut(){
+  if(!translated)return;
+  window.speechSynthesis.cancel();
+  var to=document.getElementById("toLang").value;
+  var u=new SpeechSynthesisUtterance(translated);
+  u.lang=getSpeakLang(to);
+  u.rate=0.85;
+  var vl=to.split("-")[0];
+  var pref=VOICES.filter(function(v){return v.lang.startsWith(vl);});
+  if(pref.length>0){
+    var nat=pref.find(function(v){return v.localService||v.name.includes("Enhanced");});
+    u.voice=nat||pref[0];
+  }
+  window.speechSynthesis.speak(u);
+}
+
+// ── Demo ──
+function test(from,to,text){
+  document.getElementById("fromLang").value=from;
+  document.getElementById("toLang").value=to;
+  updateTags();
+  transcript=text;
+  document.getElementById("ttext").textContent=text;
+  document.getElementById("ttext").classList.remove("empty");
+  translateNow(text);
+}
+
+function toggleAuto(){
+  autoPlay=!autoPlay;
+  document.getElementById("autoBtn").classList.toggle("on",autoPlay);
+}
+
+function toggleOffline(){
+  offlineMode=!offlineMode;
+  document.getElementById("offlineBtn").classList.toggle("on",offlineMode);
+  document.getElementById("offlineBtn").textContent=offlineMode?"📴 離線模式":"📴 離線優先";
+}
+
+// ── Init ──
+updateTags();
+window.speechSynthesis.getVoices();
+window.speechSynthesis.onvoiceschanged=function(){VOICES=window.speechSynthesis.getVoices();};
+</script>
+</body>
+</html>

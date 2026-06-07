@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>LA-Tina Pro Controller</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #121212;
+            color: #eee;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header-sticky {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: #1a1a1a;
+            padding: 20px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            border-bottom: 2px solid #FFD700;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        h1 { color: #FFD700; margin: 0; font-size: 24px; text-transform: uppercase; letter-spacing: 2px; }
+
+        .nav-controls { display: flex; gap: 20px; justify-content: center; }
+
+        .nav-btn {
+            padding: 15px 40px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px;
+            border: none;
+            transition: all 0.2s;
+        }
+        .prev-btn { background: #666; color: #fff; }
+        .next-btn { background: #FFD700; color: #000; }
+        .nav-btn:hover { transform: scale(1.05); filter: brightness(1.2); }
+
+        .tool-bar {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .tool-btn {
+            padding: 8px 15px;
+            background: #333;
+            color: #FFEC8B;
+            border: 1px solid #444;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .tool-btn.active { background: #FFD700; color: #000; font-weight: bold; }
+
+        .content-area {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .card { background: #1e1e1e; border-radius: 15px; padding: 25px; border: 1px solid #333; }
+
+        #search-bar {
+            width: 100%;
+            padding: 15px;
+            background: #222;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 8px;
+            font-size: 18px;
+            margin-bottom: 20px;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 12px;
+        }
+
+        button.preset-btn {
+            padding: 15px;
+            cursor: pointer;
+            border: 1px solid #333;
+            background: #252525;
+            color: #FFEC8B;
+            border-radius: 8px;
+            text-align: left;
+            transition: all 0.2s;
+            font-size: 15px;
+            line-height: 1.5;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        button.preset-btn:hover { background: #333; border-color: #FFD700; color: #fff; }
+        button.preset-btn strong { color: #FFD700; font-size: 17px; display: block; margin-bottom: 4px; }
+        button.preset-btn span { font-size: 13px; opacity: 0.8; font-style: italic; }
+        button.preset-btn.active { background: #443f00; border-color: #FFD700; box-shadow: 0 0 10px rgba(255,215,0,0.3); }
+
+        #timer-panel {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: #aaa;
+        }
+        #timer-input { width: 50px; background: #222; color: #fff; border: 1px solid #444; padding: 3px; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="header-sticky">
+        <h1>LA-Tina Pro Controller</h1>
+        <div class="nav-controls">
+            <button onclick="changeIdx(-1)" class="nav-btn prev-btn">◀ PREV</button>
+            <button onclick="changeIdx(1)" class="nav-btn next-btn">NEXT ▶</button>
+        </div>
+        <div class="tool-bar">
+            <button id="btn-lt" onclick="setLayout('lower-third')" class="tool-btn active">Lower Third</button>
+            <button id="btn-fs" onclick="setLayout('full-screen')" class="tool-btn">Full Screen</button>
+            <div id="timer-panel">
+                Auto: <input type="number" id="timer-input" value="0" min="0"> sec
+                <button id="btn-timer" onclick="toggleTimer()" class="tool-btn">Start</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-area">
+        <div class="card">
+            <input type="text" id="search-bar" placeholder="Search keywords (CN/VN)..." oninput="filterPresets()">
+            <div id="presets-container"></div>
+        </div>
+    </div>
+
+    <script>
+        const slides = [{"zh": "四十二章「觀靈覺，即菩提」", "en": "Kinh 42 chương: “Quán linh giác tức là Bồ-đề”"}, {"zh": "觀：覺察、反省自己的內心", "en": "Quán: quan sát, tự phản tỉnh nội tâm của chính mình"}, {"zh": "靈覺：人本來就具有的佛性與覺知（良知）", "en": "Linh giác: Phật tính và năng lực nhận biết (lương tri) vốn sẵn có của con người"}, {"zh": "菩提：智慧「覺悟的智慧」", "en": "Bồ-đề: trí tuệ, “trí tuệ giác ngộ”"}, {"zh": "「觀靈覺即菩提」", "en": "“Quán Linh Giác Tức Bồ-đề”"}, {"zh": "觀：覺察、反省自己的內心", "en": "Quán: Quan sát, tỉnh thức và phản tỉnh nội tâm của chính mình."}, {"zh": "靈覺：人本來就具有的佛性與覺知（良知）", "en": "Linh giác: Phật tính vốn sẵn có nơi mỗi con người cùng với năng lực nhận biết và lương tri bẩm sinh."}, {"zh": "菩提：妙智慧（覺悟的智慧）", "en": "Bồ-đề: Trí tuệ nhiệm mầu, tức là trí tuệ của sự giác ngộ."}, {"zh": "只要能觀察自己內心本來的覺性，就能體會到那個靈明的覺知本身，就是智慧。", "en": "Chỉ cần có thể quan sát được bản tính giác ngộ vốn có trong nội tâm mình, thì sẽ cảm nhận được rằng chính sự sáng suốt và nhận biết ấy là trí tuệ."}, {"zh": "向內看自己的真心、本來的覺性，就是佛的智慧。", "en": "Quay vào bên trong để nhìn lại chân tâm và bản tính giác ngộ vốn có của mình, đó chính là trí tuệ của chư Phật."}, {"zh": "例如：當人生氣時，如果突然覺察到「我在生氣」，那個能知道「自己在生氣」的心，就是靈覺。", "en": "Ví dụ: Khi một người đang tức giận mà đột nhiên nhận ra rằng: “Mình đang tức giận”, thì cái tâm biết được mình đang tức giận đó chính là linh giác."}, {"zh": "生氣 → 是一種情緒。", "en": "Tức giận → là một loại cảm xúc."}, {"zh": "知道自己在生氣 → 是靈覺。", "en": "Biết mình đang tức giận → chính là linh giác."}, {"zh": "若能保持這種覺察，不被情緒帶走，就接近菩提妙智慧。", "en": "Nếu có thể duy trì sự tỉnh thức ấy mà không bị cảm xúc lôi kéo, thì sẽ dần tiến gần đến Bồ-đề, tức là trí tuệ giác ngộ nhiệm mầu."}, {"zh": "修道不是一直看別人的缺點，而是時時觀照自己的心。", "en": "Tu đạo không phải là luôn nhìn lỗi lầm của người khác, mà là thường xuyên quan sát tâm của chính mình."}, {"zh": "當我們知道自己在想什麼、做什麼、感受什麼時，這份清楚明白的覺知，就是靈覺。", "en": "Khi chúng ta biết rõ mình đang nghĩ gì, làm gì và cảm nhận điều gì, thì sự nhận biết sáng suốt đó chính là linh giác."}, {"zh": "靈覺愈清楚，智慧就愈增長；智慧愈增長，離佛性就愈近。", "en": "Linh giác càng rõ ràng thì trí tuệ càng tăng trưởng; trí tuệ càng tăng trưởng thì càng gần với Phật tính."}, {"zh": "因此，「觀靈覺即菩提」，就是教導我們向內反觀自心，從覺察中開啟本有的佛性智慧。", "en": "Vì vậy, “Quán Linh Giác Tức Bồ-đề” dạy chúng ta quay vào trong để quán chiếu tự tâm, từ sự tỉnh thức mà khai mở trí tuệ Phật tính vốn có."}, {"zh": "例如我們做了一件不太好的事，心裡會出現：「這樣做不太對，有個內疚感。」", "en": "Ví dụ, khi chúng ta làm một việc không được tốt lắm, trong lòng sẽ xuất hiện ý nghĩ: “Làm như vậy có vẻ không đúng”, và cảm thấy áy náy, hối lỗi."}, {"zh": "這個提醒我們的清楚感覺，就是靈性覺醒的一種表現。", "en": "Sự nhắc nhở rõ ràng từ nội tâm ấy chính là một biểu hiện của sự thức tỉnh tâm linh."}, {"zh": "有人問禪師：「請問師父，佛在哪裡？」", "en": "Có người hỏi một vị Thiền sư: “Thưa Thầy, Phật ở đâu?”"}, {"zh": "禪師回答：「能聽我說話的那個，就是佛。」", "en": "Thiền sư trả lời: “Cái đang nghe ta nói đây chính là Phật.”"}, {"zh": "是我嗎？原來我自己原本就是佛。", "en": "Là tôi sao? Thì ra bản tính chân thật của chính mình vốn đã là Phật."}, {"zh": "靈覺就是：能知道「自己在想什麼、在做什麼、有什麼感覺」的那個「清醒的心」。", "en": "Linh giác chính là “tâm tỉnh thức” có khả năng biết được mình đang nghĩ gì, đang làm gì và đang cảm nhận điều gì."}, {"zh": "我們在一天裡都在想什麼呢？", "en": "Trong một ngày, chúng ta thường suy nghĩ những gì?"}, {"zh": "有的夫妻吵架不說話以後悶著氣兩個人，心中都在想等一下要用什麼更惡毒的話說出來刺傷對方。", "en": "Có những cặp vợ chồng sau khi cãi nhau thì không nói chuyện với nhau, trong lòng vẫn ôm cơn giận và nghĩ xem lát nữa sẽ dùng lời nào cay nghiệt hơn để làm tổn thương đối phương."}, {"zh": "二十四小時之中除了睡覺以外，我們在做什麼呢？", "en": "Trong hai mươi bốn giờ mỗi ngày, ngoài thời gian ngủ nghỉ, chúng ta đang làm gì?"}, {"zh": "是不是上班、吃飯、洗衣服、煮飯呢？", "en": "Có phải là đi làm, ăn cơm, giặt giũ và nấu nướng không?"}, {"zh": "學道以後，我們的佛性有感覺到什麼嗎？", "en": "Sau khi học đạo, Phật tính của chúng ta có cảm nhận được điều gì không?"}, {"zh": "還是我們從來沒有想過這些問題。", "en": "Hay là từ trước đến nay chúng ta chưa từng suy nghĩ về những vấn đề này?"}, {"zh": "修道最重要的，不是知道多少道理，而是能不能覺察自己的心。", "en": "Điều quan trọng nhất trong tu đạo không phải là biết bao nhiêu đạo lý, mà là có thể quan sát được tâm mình hay không."}, {"zh": "當我們生氣時知道自己在生氣；當我們貪心時知道自己在貪心；當我們做錯事時知道自己做錯了，這就是靈覺在作用。", "en": "Khi tức giận mà biết mình đang tức giận; khi tham lam mà biết mình đang tham lam; khi làm sai mà biết mình đã làm sai, đó chính là linh giác đang hoạt động."}, {"zh": "能夠時時反省自己的人，智慧會一天一天增長；能夠看見自己的缺點並願意改過的人，就正在走向覺悟之路。", "en": "Người thường xuyên tự phản tỉnh sẽ ngày càng tăng trưởng trí tuệ; người thấy được khuyết điểm của mình và sẵn lòng sửa đổi chính là đang bước trên con đường giác ngộ."}, {"zh": "所以修道不是向外找佛，而是向內找回自己本來具足的佛性與良知。", "en": "Vì vậy, tu đạo không phải đi tìm Phật ở bên ngoài, mà là quay vào bên trong để tìm lại Phật tính và lương tri vốn đầy đủ nơi chính mình."}, {"zh": "我們觸電過嗎？當電流的瓦特小的我們還可以承受得住。", "en": "Chúng ta đã từng bị điện giật chưa? Khi dòng điện còn nhỏ thì cơ thể chúng ta vẫn có thể chịu đựng được."}, {"zh": "一旦大到20毫安培，我們的肌肉就會收縮，然後黏住拔也拔不開。", "en": "Khi cường độ dòng điện đạt khoảng 20 miliampe, cơ bắp sẽ co cứng lại, tay có thể bị dính vào nguồn điện và không thể tự rút ra được."}, {"zh": "萬一到了50毫安培，電流會通過心臟，那就有生命危險。", "en": "Nếu dòng điện tăng đến khoảng 50 miliampe và đi qua tim thì sẽ gây nguy hiểm đến tính mạng."}, {"zh": "靈性的覺醒有一點像觸電，只是沒有危險，也不會造成生命的威脅。", "en": "Sự thức tỉnh tâm linh có phần giống như bị điện giật, nhưng không hề nguy hiểm và cũng không đe dọa tính mạng."}, {"zh": "當我們聽到一段道理或是前輩一句話的提醒，或是身體的痛苦讓我們感觸到生命的寶貴而使我們覺悟。", "en": "Khi chúng ta nghe được một đạo lý, một lời nhắc nhở của tiền bối, hoặc trải qua đau khổ về thân thể khiến chúng ta cảm nhận được giá trị quý báu của sự sống, từ đó mà giác ngộ."}, {"zh": "每個人靈性的覺醒過程不同，但是卻各個有趣。", "en": "Quá trình thức tỉnh tâm linh của mỗi người đều khác nhau, nhưng mỗi câu chuyện đều có ý nghĩa riêng."}, {"zh": "（菩薩眼中是有趣，眾生眼中是痛苦。）", "en": "(Trong mắt Bồ Tát đó là một quá trình đáng suy ngẫm; nhưng trong mắt chúng sinh lại thường là đau khổ.)"}, {"zh": "有的是平靜的，有的卻是驚心動魄的。", "en": "Có người thức tỉnh một cách nhẹ nhàng bình lặng, có người lại trải qua những biến cố chấn động lòng người."}, {"zh": "靈性的覺醒又像是浪子回頭。", "en": "Sự thức tỉnh tâm linh cũng giống như hình ảnh “lãng tử quay đầu”."}, {"zh": "一般我們說浪子，是放蕩不務正業的孩子。", "en": "Thông thường, “lãng tử” là người sống buông thả, không lo làm ăn hay học hành đàng hoàng."}, {"zh": "會到處遊蕩、完全不顧家庭，又揮霍錢財，是愛玩、不負責任的人。", "en": "Họ lang thang khắp nơi, không quan tâm đến gia đình, tiêu xài hoang phí, chỉ ham vui và thiếu trách nhiệm."}, {"zh": "靈性的覺醒，往往不是在最順利的時候發生，而是在人生遇到挫折、病痛、失敗或打擊的時候開始。", "en": "Sự thức tỉnh tâm linh thường không xuất hiện khi mọi việc thuận lợi, mà lại bắt đầu từ những lúc con người gặp thất bại, bệnh tật, đau khổ hay biến cố trong cuộc đời."}, {"zh": "當一個人開始思考「人生到底是為了什麼？」、「我應該怎麼活？」的時候，覺醒的種子就開始萌芽了。", "en": "Khi một người bắt đầu suy nghĩ: “Mục đích của cuộc sống là gì?” hay “Mình nên sống như thế nào?”, thì hạt giống giác ngộ đã bắt đầu nảy mầm."}, {"zh": "因此，許多苦難未必是壞事，它有時正是上天提醒我們回頭、反省與成長的機會。", "en": "Vì vậy, nhiều đau khổ chưa hẳn là điều xấu; đôi khi đó chính là cơ hội để Trời Phật nhắc nhở chúng ta quay đầu, phản tỉnh và trưởng thành hơn."}, {"zh": "正如浪子回頭金不換，一個人一旦覺悟了人生的方向，願意改過向善，這份價值比金銀財寶更加珍貴。", "en": "Giống như câu “Lãng tử hồi đầu vàng không đổi được”, khi một người đã giác ngộ được phương hướng đúng đắn của đời mình và quyết tâm sửa đổi để hướng thiện, thì giá trị ấy còn quý hơn vàng bạc châu báu."}, {"zh": "浪子回頭金不換 = 原本我們只是做一個平凡人，生活很隨意，順著因緣果報在過日子。", "en": "“Lãng tử hồi đầu vàng không đổi được” nghĩa là trước đây chúng ta chỉ là những người bình thường, sống khá tùy ý, thuận theo nhân duyên và nghiệp quả mà trải qua cuộc sống."}, {"zh": "現在求道修道以後，懂得來重新做人，知道吃素守戒律有很多好處，而且還可以幫助諸佛菩薩來渡人救人！", "en": "Sau khi cầu đạo và tu đạo, chúng ta hiểu được cách làm người mới, biết rằng ăn chay và giữ giới mang lại rất nhiều lợi ích, đồng thời còn có thể giúp chư Phật, chư Bồ Tát độ người cứu người."}, {"zh": "這種生活是神聖有榮耀的，只是會比較勞累。", "en": "Cuộc sống này rất thiêng liêng và đầy vinh dự, chỉ là sẽ vất vả hơn một chút."}, {"zh": "經理們的勞累，二、三天就要換一個枕頭！", "en": "Sự vất vả của các vị phụ trách đạo vụ đôi khi đến mức hai, ba ngày phải thay một cái gối mới vì quá bận rộn và lo nghĩ."}, {"zh": "我們有家庭，有自己的工作，有父母要照顧，有朋友的來往。", "en": "Chúng ta có gia đình, có công việc riêng, có cha mẹ cần chăm sóc và có các mối quan hệ bạn bè cần duy trì."}, {"zh": "就好像一個人有兩份工作，一份是世俗的工作，一份是聖人的工作。", "en": "Giống như một người có hai công việc: một là công việc thế tục, một là công việc của bậc thánh hiền."}, {"zh": "世俗工作由公司給我們薪水還有保險。", "en": "Công việc thế tục mang lại lương bổng và bảo hiểm từ công ty."}, {"zh": "聖人的工作是諸佛菩薩給我們福德與平安。", "en": "Công việc của bậc thánh mang lại phước đức và bình an do chư Phật, chư Bồ Tát gia hộ."}, {"zh": "聖人的工作也有保險，保險是有榮耀、有上天恩賜的平安。", "en": "Công việc của bậc thánh cũng có “bảo hiểm”, đó là sự bình an, vinh dự và ân điển mà Trời Phật ban cho."}, {"zh": "例子：吳先生的車禍⋯⋯", "en": "Ví dụ: Câu chuyện tai nạn xe của ông Ngô (Ông Wu) …"}, {"zh": "修道不是逃避人生，而是在原本的人生責任之外，再多承擔一份救人助人的使命。", "en": "Tu đạo không phải là trốn tránh cuộc sống, mà là ngoài trách nhiệm đời thường còn gánh thêm sứ mệnh giúp người và cứu người."}, {"zh": "雖然修道人比一般人忙碌，但內心卻更充實、更有方向。", "en": "Dù người tu đạo có thể bận rộn hơn người bình thường, nhưng nội tâm lại phong phú và có phương hướng hơn."}, {"zh": "世俗工作養活我們的身體；修道行道則滋養我們的心靈與慧命。", "en": "Công việc thế tục nuôi dưỡng thân thể chúng ta; còn tu đạo và hành đạo nuôi dưỡng tâm hồn và huệ mạng của chúng ta."}, {"zh": "因此，能夠求道、修道、行道、渡人，是人生中非常殊勝而有意義的一件事。", "en": "Vì vậy, được cầu đạo, tu đạo, hành đạo và độ người là một việc vô cùng cao quý và ý nghĩa trong đời người."}, {"zh": "我們今天講一個觀世音菩薩的故事：魚籃觀音（又稱為馬郎婦觀音）。", "en": "Hôm nay chúng ta cùng kể một câu chuyện về Quán Thế Âm Bồ Tát: Ngư Lam Quán Âm (còn gọi là Mã Lang Phụ Quán Âm)."}, {"zh": "金沙灘有一位美麗女子在賣魚，她總是左手提著魚籃。", "en": "Tại Kim Sa Than có một cô gái rất xinh đẹp bán cá, trên tay trái luôn xách một giỏ cá."}, {"zh": "附近許多年輕小伙子都來跟她買魚。", "en": "Rất nhiều chàng trai trẻ trong vùng đều đến mua cá của cô."}, {"zh": "其實買魚是藉口，很多都有追求她的意思。", "en": "Thật ra mua cá chỉ là cái cớ, đa số đều muốn theo đuổi cô gái ấy."}, {"zh": "賣魚的美女知道大家的心意，就說誰能夠在一個晚上把《普門品》背起來的人就嫁給他。", "en": "Cô gái bán cá biết được tâm ý của mọi người nên nói rằng: Ai có thể thuộc lòng phẩm Phổ Môn chỉ trong một đêm thì cô sẽ lấy người đó làm chồng."}, {"zh": "為了娶漂亮的美女當老婆，大家拼命地背。", "en": "Vì muốn cưới được cô gái xinh đẹp làm vợ, mọi người đều cố gắng học thuộc kinh."}, {"zh": "幸好普門品不是很長，差不多有2100個字。", "en": "May mắn là phẩm Phổ Môn không quá dài, khoảng hơn 2.100 chữ."}, {"zh": "「不難」，許多人都能背，通過第一關。", "en": "“Không quá khó”, nên rất nhiều người đã thuộc được và vượt qua vòng đầu tiên."}, {"zh": "魚籃觀音的故事，不是在講愛情，而是在講觀世音菩薩如何用善巧方便來度化眾生。", "en": "Câu chuyện Ngư Lam Quán Âm không phải nhằm nói về tình yêu, mà là nói về cách Quán Thế Âm Bồ Tát dùng phương tiện thiện xảo để giáo hóa chúng sinh."}, {"zh": "原本 these 年輕人只是被美色吸引而來。", "en": "Ban đầu những thanh niên này chỉ bị vẻ đẹp của cô gái thu hút."}, {"zh": "但是觀音菩薩利用他們的心，引導他們去接觸佛經、學習佛法。", "en": "Nhưng Quán Thế Âm Bồ Tát đã mượn chính tâm niệm ấy để dẫn dắt họ tiếp xúc với kinh điển và học Phật pháp."}, {"zh": "眾生因為愛美而來，最後卻因為學經而種下佛緣。", "en": "Chúng sinh vì yêu thích sắc đẹp mà đến, nhưng cuối cùng lại gieo được nhân duyên với Phật pháp qua việc học kinh."}, {"zh": "這就是菩薩慈悲度眾的智慧與方便法門。", "en": "Đó chính là trí tuệ và phương tiện thiện xảo đầy từ bi của Bồ Tát trong việc cứu độ chúng sinh."}, {"zh": "美女再要求，能夠背出《金剛經》5100個字，難一點了，但是有些人也可以背下來。", "en": "Người thiếu nữ lại đưa ra yêu cầu tiếp theo: ai có thể thuộc lòng Kinh Kim Cang gồm khoảng 5.100 chữ. Điều này khó hơn, nhưng vẫn có một số người làm được."}, {"zh": "多人通過金剛經第二關，接下來是法華經。", "en": "Nhiều người đã vượt qua cửa ải thứ hai là Kinh Kim Cang, tiếp theo là Kinh Pháp Hoa."}, {"zh": "查了，法華經有71,000多個字。這個相當困難。", "en": "Theo tìm hiểu, Kinh Pháp Hoa có hơn 71.000 chữ. Đây là một thử thách vô cùng khó khăn."}, {"zh": "最後只有一位馬先生能夠順利地背出法華經。", "en": "Cuối cùng chỉ có một người họ Mã có thể trôi chảy đọc thuộc toàn bộ Kinh Pháp Hoa."}, {"zh": "這在現代叫做冠軍得主。", "en": "Nếu theo cách nói ngày nay, ông chính là người đạt giải quán quân."}, {"zh": "賣魚的美女在成婚當天卻生病死去了，身體迅速地朽壞流膿流著臭水。", "en": "Thế nhưng vào đúng ngày thành hôn, người thiếu nữ bán cá đột nhiên lâm bệnh rồi qua đời. Thi thể nhanh chóng phân hủy, chảy mủ và bốc mùi hôi."}, {"zh": "奇妙的是雖然女子死去，馬郎卻因為他熟讀佛經卻因此開悟了。", "en": "Điều kỳ diệu là tuy người thiếu nữ đã mất, nhưng nhờ chuyên tâm học thuộc và nghiên cứu kinh điển, ông Mã Lang lại nhân đó mà khai ngộ."}, {"zh": "這是觀音菩薩以方便之門來度化眾生的例子。", "en": "Đây là một ví dụ về việc Bồ Tát Quán Thế Âm dùng phương tiện thiện xảo để giáo hóa và cứu độ chúng sinh."}, {"zh": "後代的畫家聽到這個故事，就把觀音菩薩畫成左手提著魚籃的少女的形象。", "en": "Về sau, các họa sĩ khi nghe câu chuyện này đã vẽ hình tượng Bồ Tát Quán Thế Âm dưới dáng vẻ một thiếu nữ tay trái xách giỏ cá."}, {"zh": "因此稱為「魚籃觀音」或「馬郎婦觀音」。", "en": "Vì thế, hình tượng này được gọi là Ngư Lam Quan Âm (魚籃觀音) hoặc Mã Lang Phụ Quan Âm (馬郎婦觀音)."}, {"zh": "這個故事告訴我們，佛菩薩度化眾生的方法很多，不一定都是直接講經說法。", "en": "Câu chuyện này cho chúng ta biết rằng phương pháp cứu độ chúng sinh của chư Phật và Bồ Tát rất đa dạng, không nhất thiết chỉ là trực tiếp giảng kinh thuyết pháp."}, {"zh": "有時候藉著一個因緣、一件事情，甚至一段感情，都可能成為覺悟的契機。", "en": "Đôi khi thông qua một nhân duyên, một sự việc, thậm chí một mối tình cảm, cũng có thể trở thành cơ hội giúp con người giác ngộ."}, {"zh": "修道最重要的是啟發自己的佛性，喚醒本來具足的良知良能。", "en": "Điều quan trọng nhất trong tu đạo là khơi mở Phật tính nơi chính mình, đánh thức lương tri và năng lực thiện lành vốn sẵn có."}, {"zh": "當我們能夠反省自己、改過遷善、利益眾生，就是在走向覺悟的道路。", "en": "Khi chúng ta biết tự phản tỉnh, sửa đổi lỗi lầm, hướng thiện và giúp ích cho mọi người, đó chính là đang bước đi trên con đường giác ngộ."}, {"zh": "這也正是「觀靈覺即菩提」的真實意義。", "en": "Đó cũng chính là ý nghĩa chân thật của câu:"}, {"zh": "「觀靈覺即菩提」", "en": "“Quán linh giác tức Bồ-đề.”"}, {"zh": "觀自己的靈覺，便能發現本具的智慧；認識自己的真心，便能走向覺悟。", "en": "Quán chiếu linh giác của chính mình sẽ phát hiện được trí tuệ vốn có; nhận ra chân tâm của mình sẽ bước vào con đường giác ngộ."}, {"zh": "願我們都能時時觀照自心，覺察自己的起心動念，學習諸佛菩薩的大慈大悲，讓人生更加光明圓滿。", "en": "Nguyện cho tất cả chúng ta luôn biết quán chiếu nội tâm, nhận rõ từng ý niệm khởi sinh, học tập lòng đại từ đại bi của chư Phật và Bồ Tát, để cuộc đời ngày càng sáng tỏ và viên mãn hơn."}, {"zh": "佛言：", "en": "Phật dạy:"}, {"zh": "當念身中四大。", "en": "Hãy quán niệm bốn đại trong thân."}, {"zh": "各自有名。", "en": "Mỗi đại đều có tên gọi riêng."}, {"zh": "都無我者。我既都無。", "en": "Đều không có “cái tôi”. Nếu “tôi” vốn không có thật."}, {"zh": "其如幻耳。", "en": "Thì thân này chỉ như ảo ảnh mà thôi."}, {"zh": "Kinh Tứ Thập Nhị Chương, Đức Phật dạy: \t  \"Hãy thường quán sát thân này do bốn đại là Đất, Nước, Gió, Lửa hợp thành. Mỗi đại đều có tên gọi và tính chất riêng. Trong đó vốn không có một cái 'Ta' chân thật. Nếu đã không có cái 'Ta' cố định, thì thân thể và cuộc đời này cũng chỉ như huyễn hóa mà thôi.\"", "en": "四十二章經》佛言：當念身中四大，各自有名，都無我者。我既都無，其如幻耳。"}, {"zh": "這是釋迦牟尼佛教導我們如何透過觀察身體的本質，來放下對「我這個人」的執著。", "en": "Đây là lời dạy của Đức Phật Thích Ca, chỉ cho chúng ta cách quan sát bản chất của thân thể để buông bỏ sự chấp trước vào cái gọi là \"cái tôi\"."}, {"zh": "佛說：「修道人應當常常想著並且觀察我們的身體，它是由『水、火、風、土』這四種元素所組合而成的。」", "en": "Đức Phật dạy: \"Người tu đạo nên thường xuyên quán chiếu thân thể mình. Thân này được cấu thành bởi bốn yếu tố là Đất, Nước, Gió và Lửa.\""}, {"zh": "這四種元素各自有它們的名字與特性。", "en": "Bốn yếu tố này đều có tên gọi và đặc tính riêng của chúng."}, {"zh": "根本上沒有一個真正、固定不變的『我』存在。", "en": "Thực chất không hề tồn tại một cái \"Ta\" chân thật và bất biến."}, {"zh": "既然這個『我』本來就是暫時的稱呼，那麼這個身體和生命，其實只是幻象、魔術變現出來的幻影一樣。", "en": "Vì cái \"Ta\" chỉ là một danh xưng tạm thời, nên thân thể và sinh mạng này cũng giống như một ảo ảnh được biến hiện ra bởi phép huyễn hóa."}, {"zh": "根本是虛妄不實。", "en": "Rốt ráo đều là hư vọng, không có thực thể cố định."}, {"zh": "以上是白話文簡單地解釋，接下來我們一句一句的來學習。", "en": "Trên đây là phần giải thích đơn giản bằng ngôn ngữ dễ hiểu. Tiếp theo chúng ta sẽ học và tìm hiểu từng câu một."}, {"zh": "1. 當念身中四大，各自有名", "en": "1. Hãy quán niệm bốn đại trong thân, mỗi đại đều có tên gọi riêng"}, {"zh": "四大是什麼？", "en": "Tứ đại là gì?"}, {"zh": "佛說：世間的一切物質（如我們的身體）都是由四種基本元素組成的：", "en": "Đức Phật dạy: Tất cả vật chất trong thế gian (bao gồm thân thể của chúng ta) đều được cấu thành từ bốn yếu tố cơ bản:"}, {"zh": "土：堅硬性的物質，我們的骨骼、肌肉、皮膚、毛髮。吃土還土。", "en": "Đất (Địa): Những vật chất có tính cứng chắc như xương, cơ bắp, da và tóc của chúng ta. Từ đất mà đến, rồi trở về với đất."}, {"zh": "水：濕潤流動性的物質，如血液、唾液、汗水、尿液。", "en": "Nước (Thủy): Những vật chất có tính ẩm ướt và lưu động như máu, nước bọt, mồ hôi và nước tiểu."}, {"zh": "火：溫熱性的物質，如體溫、新陳代謝的熱能。", "en": "Lửa (Hỏa): Những yếu tố mang tính nóng ấm như thân nhiệt và nhiệt năng của quá trình trao đổi chất."}, {"zh": "風：動態呼吸的物質，如呼吸、體內的氣體流動如屁。", "en": "Gió (Phong): Những yếu tố mang tính vận động như hơi thở và sự lưu thông khí trong cơ thể như khí hơi."}, {"zh": "各自有名：各有稱呼名字，如血管流動的就叫血液。", "en": "Mỗi đại đều có tên gọi riêng: Mỗi yếu tố đều có tên gọi của nó, ví dụ chất lỏng lưu thông trong mạch máu được gọi là máu."}, {"zh": "但在這堆細胞、水分和熱量裡，哪一個能單獨拿出來叫做「我」呢？", "en": "Nhưng trong đống tế bào, nước và nhiệt lượng này, có thứ nào có thể tách riêng ra để gọi là “Tôi” hay không?"}, {"zh": "2. 都無我者，我既都無", "en": "2. Tất cả đều không có “cái tôi”, nếu “tôi” vốn không thật có"}, {"zh": "我們常常覺得有一個「我」在受苦、在快樂、在變老。但如果把身體拆開來看，骨頭不代表我，血液也不代表我。", "en": "Chúng ta thường cảm thấy có một “cái tôi” đang đau khổ, đang vui vẻ, đang già đi. Nhưng nếu tách thân thể ra để nhìn, xương không phải là tôi, máu cũng không phải là tôi."}, {"zh": "身體就像是一輛組裝好的汽車，由輪胎、引擎、車殼組成。如果把零件全部拆散，放在地上，就沒有「汽車」這個東西了。「汽車」只是一個暫時組合起來的概念，我們的「身體」และ「我」也是一樣的道理。", "en": "Thân thể giống như một chiếc xe hơi được lắp ráp từ lốp xe, động cơ và vỏ xe. Nếu tháo rời tất cả các bộ phận và đặt xuống đất, thì không còn “xe hơi” nữa. “Xe hơi” chỉ là một khái niệm tạm thời do sự kết hợp tạo thành. Thân thể và “cái tôi” của chúng ta cũng giống như vậy."}, {"zh": "3. 其如幻耳", "en": "3. Nó chỉ như ảo ảnh mà thôi"}, {"zh": "既然身體只是由這些元素「暫時借來組合」在一起的，它就會隨著因緣而生滅（會生病、會衰老、會消逝）。", "en": "Vì thân thể chỉ là sự “tạm thời mượn hợp” của các yếu tố này, nên nó sẽ theo nhân duyên mà sinh diệt (sẽ bệnh, sẽ già, và sẽ mất đi)."}, {"zh": "因此，佛陀用「幻」來形容。好像魔術師變出一隻兔子，看起來栩栩如生，但本質是假的。", "en": "Vì vậy, Đức Phật dùng chữ “huyễn” để hình dung. Giống như ảo thuật gia biến ra một con thỏ, nhìn rất sống động, nhưng bản chất là giả."}, {"zh": "我們的身體和世間萬物的顯現也是這樣，看起來很真實，但經不起時間的拆解，本質是虛幻的，時間一到空空如也。", "en": "Thân thể chúng ta và sự hiển hiện của vạn vật thế gian cũng như vậy, nhìn thì rất chân thật, nhưng không chịu được sự phân giải của thời gian, bản chất là hư ảo, đến lúc thời gian đến thì trống rỗng."}, {"zh": "這段話不是要讓我們變得消極，而是佛的一劑「清涼劑」", "en": "Đoạn này không phải để khiến chúng ta trở nên tiêu cực, mà là một “liều thuốc thanh lương” của Đức Phật."}, {"zh": "因為世間不如意十之八九，當我們因為身體的衰老、疾病，或者世間的得失而感到痛苦不堪時，我們就可以來想想這句話：一切都是因緣和合的幻象。", "en": "Vì trong đời sống có đến tám, chín phần là không như ý, khi chúng ta vì thân thể già yếu, bệnh tật, hoặc được mất thế gian mà cảm thấy đau khổ, thì có thể nghĩ đến câu này: tất cả đều là ảo ảnh do nhân duyên hòa hợp."}, {"zh": "看穿了這一點，心就能放下執著，得到真正的平靜。", "en": "Thấy rõ điều này rồi, tâm sẽ buông bỏ chấp trước và đạt được sự bình an chân thật."}, {"zh": "心平靜了人也平安了。", "en": "Tâm an thì con người cũng an."}, {"zh": "人有平安，修道就更容易了。", "en": "Khi con người có sự bình an, việc tu đạo sẽ càng dễ dàng hơn."}, {"zh": "@何仙姑", "en": "@Hà Tiên Cô"}, {"zh": "八仙之一", "en": "Một trong Bát Tiên"}, {"zh": "俗名何瓊（香）", "en": "Tên tục là Hà Quỳnh (Hương)"}, {"zh": "為呂洞賓仙人所度", "en": "Được tiên nhân Lữ Động Tân độ hóa"}, {"zh": "「何仙姑」是八仙中唯一的女仙。", "en": "“Há Tiên Cô” là nữ tiên duy nhất trong Bát Tiên."}, {"zh": "形象常常是手持荷花的美麗女子，荷花象徵和諧與純潔。", "en": "Hình tượng thường là một thiếu nữ xinh đẹp cầm hoa sen, hoa sen tượng trưng cho sự hài hòa và thuần khiết."}, {"zh": "她常化解人間災難、濟救眾生。", "en": "Bà thường hóa giải tai nạn nhân gian và cứu giúp chúng sinh."}, {"zh": "何仙姑是唐朝人，名何瓊（或何香）。", "en": "Hà Tiên Cô là người thời Đường, tên là Hà Quỳnh (hoặc Hà Hương)."}, {"zh": "相傳她在十三歲時隨著很多長輩一起上山採茶，途中他迷了路，巧遇仙人（呂洞賓）賜予她一顆仙桃，她把仙桃吃了一半，心中就大徹大悟了，剩下一半打算拿回家孝敬父母親。", "en": "Tương truyền năm 13 tuổi, bà cùng nhiều người lớn lên núi hái trà, trên đường bị lạc, gặp tiên nhân (Lữ Động Tân) và được ban cho một quả đào tiên. Bà ăn một nửa thì đại ngộ, nửa còn lại định mang về hiếu kính cha mẹ."}, {"zh": "後得道成仙了。", "en": "Sau đó đắc đạo thành tiên."}, {"zh": "曾經有另一位仙人託夢給她十五歲時，神仙教她吃雲母粉。", "en": "Có lần vào năm 15 tuổi, một vị tiên khác hiện trong mộng dạy bà dùng “phấn vân mẫu”."}, {"zh": "吃了以後身體變得非常的輕盈，就像羽毛那樣的輕飄飄，能自由往來於山谷之間。", "en": "Sau khi dùng, thân thể trở nên rất nhẹ, như lông vũ, có thể tự do qua lại giữa các thung lũng."}, {"zh": "雲母在古代是用來煉丹、制藥的。", "en": "Vân mẫu trong thời cổ được dùng để luyện đan và chế thuốc."}, {"zh": "古人認為雲母能「輕身延年」", "en": "Người xưa cho rằng vân mẫu có thể “làm nhẹ thân và kéo dài tuổi thọ”."}, {"zh": "仙姑是不吃穀物米飯，只是偶爾吃些水果，每天早晨上山採摘山果奉孝母親，傍晚才回家。", "en": "Hà Tiên Cô không ăn ngũ cốc hay cơm, chỉ thỉnh thoảng ăn trái cây; mỗi sáng bà lên núi hái quả dâng cho mẹ, chiều tối mới về nhà."}, {"zh": "她有預知未來的法力，久而久之，不僅能知道眾人的吉凶禍福，還能幫許多人治病，所以被大家稱為「何仙姑」。", "en": "Bà có khả năng tiên tri tương lai; về lâu dài không chỉ biết cát hung họa phúc của mọi người mà còn giúp chữa bệnh cho nhiều người, vì vậy được gọi là “Hà Tiên Cô”."}, {"zh": "那個時代的皇帝武則天聽說嶺南有一位能預知未來、不吃不喝的女仙，便派使者前往當地，下詔召她進京面聖。", "en": "Thời đó, hoàng đế Võ Tắc Thiên nghe nói ở Lĩnh Nam có một nữ tiên có thể biết trước tương lai, không ăn không uống, liền sai sứ giả đến địa phương và ban chiếu triệu bà vào kinh yết kiến."}, {"zh": "在前往京城的途中，何仙姑突然在眾目睽睽之下憑空消失。", "en": "Trên đường đến kinh thành, Hà Tiên Cô đột nhiên biến mất ngay trước mắt mọi người."}, {"zh": "就在當天，有鄉民看到她在五色祥雲的環繞下，手持荷花踩著雲朵升天成仙了。", "en": "Cùng ngày hôm đó, người dân địa phương nhìn thấy bà được bao quanh bởi mây ngũ sắc, tay cầm hoa sen, bước trên mây và bay lên trời thành tiên."}];
+        let currentIdx = 0;
+        let timerInterval = null;
+        const channel = new BroadcastChannel('la_tina_sync');
+
+        function sync(index) {
+            currentIdx = index;
+            channel.postMessage({ action: 'sync', index: index });
+            highlightActiveButton();
+        }
+
+        function changeIdx(delta) {
+            currentIdx = Math.max(0, Math.min(slides.length - 1, currentIdx + delta));
+            sync(currentIdx);
+        }
+
+        function setLayout(layout) {
+            channel.postMessage({ action: 'setLayout', layout: layout });
+            document.getElementById('btn-lt').classList.toggle('active', layout === 'lower-third');
+            document.getElementById('btn-fs').classList.toggle('active', layout === 'full-screen');
+        }
+
+        function toggleTimer() {
+            const btn = document.getElementById('btn-timer');
+            const sec = parseInt(document.getElementById('timer-input').value);
+            
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                btn.innerText = 'Start';
+                btn.classList.remove('active');
+            } else if (sec > 0) {
+                timerInterval = setInterval(() => changeIdx(1), sec * 1000);
+                btn.innerText = 'Stop';
+                btn.classList.add('active');
+            }
+        }
+
+        function highlightActiveButton() {
+            const btns = document.querySelectorAll('.preset-btn');
+            btns.forEach((btn, i) => {
+                // This is tricky during filtering. We need to find the button that matches currentIdx.
+                // Since we store data-index on the button, we use that.
+                btn.classList.toggle('active', parseInt(btn.dataset.index) === currentIdx);
+            });
+        }
+
+        function filterPresets() {
+            const term = document.getElementById('search-bar').value.toLowerCase();
+            renderPresets(term);
+            highlightActiveButton();
+        }
+
+        function renderPresets(filter = "") {
+            const container = document.getElementById('presets-container');
+            container.innerHTML = '';
+            
+            const filtered = slides.filter(p => 
+                p.zh.toLowerCase().includes(filter) || 
+                p.en.toLowerCase().includes(filter)
+            );
+
+            const group = document.createElement('div');
+            group.className = 'btn-group';
+
+            filtered.forEach((p) => {
+                const originalIdx = slides.indexOf(p);
+                const btn = document.createElement('button');
+                btn.className = 'preset-btn';
+                btn.dataset.index = originalIdx;
+                btn.innerHTML = `<strong>${p.zh}</strong><span>${p.en}</span>`;
+                btn.onclick = () => sync(originalIdx);
+                group.appendChild(btn);
+            });
+
+            container.appendChild(group);
+        }
+
+        renderPresets();
+    </script>
+</body>
+</html>

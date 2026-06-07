@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>富國島 Travel OS</title>
+    <style>
+        :root {
+            --primary: #007AFF; --secondary: #34C759; --accent: #FFD700;
+            --bg: #F2F2F7; --card-bg: #FFFFFF; --text-main: #1C1C1E; --text-sub: #8E8E93;
+            --danger: #FF3B30; --dark: #1C1C1E;
+        }
+        body { 
+            margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background: var(--bg); color: var(--text-main); -webkit-tap-highlight-color: transparent; 
+            line-height: 1.5;
+        }
+        header { 
+            background: var(--dark); color: white; padding: 25px 20px; 
+            text-align: center; position: sticky; top: 0; z-index: 1000; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        header h1 { margin: 0; font-size: 24px; letter-spacing: 1px; font-weight: 700; }
+        header p { margin: 5px 0 0; font-size: 14px; opacity: 0.7; }
+        .app-container { padding: 15px; padding-bottom: 100px; max-width: 600px; margin: 0 auto; }
+        .page { display: none; animation: fadeIn 0.3s ease-out; }
+        .active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .section-label { font-size: 13px; text-transform: uppercase; color: var(--text-sub); margin: 25px 0 10px 5px; font-weight: 600; letter-spacing: 1px; }
+        .card { 
+            background: var(--card-bg); margin-bottom: 15px; padding: 20px; 
+            border-radius: 24px; box-shadow: 0 6px 20px rgba(0,0,0,0.05); 
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .card-title { font-size: 22px; font-weight: 700; color: var(--text-main); }
+        .btn { 
+            display: flex; align-items: center; justify-content: center; 
+            padding: 16px; background: var(--primary); color: white; 
+            border-radius: 16px; text-decoration: none; font-weight: 600; 
+            font-size: 18px; cursor: pointer; border: none; transition: all 0.2s;
+        }
+        .btn:active { transform: scale(0.96); opacity: 0.9; }
+        .btn-secondary { background: #E5E5EA; color: var(--text-main); }
+        .btn-accent { background: var(--accent); color: var(--dark); }
+        .day-selector { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
+        .day-btn { 
+            padding: 12px 24px; background: white; border: 1px solid #ddd; 
+            border-radius: 25px; cursor: pointer; white-space: nowrap; font-weight: 700; font-size: 16px;
+        }
+        .day-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .spot { padding: 20px 0; border-bottom: 1px solid #F2F2F7; display: flex; flex-direction: column; gap: 10px; }
+        .spot:last-child { border: none; }
+        .spot-time { font-size: 16px; color: var(--primary); font-weight: 700; }
+        .spot-name { font-size: 24px; font-weight: 700; color: var(--text-main); }
+        .spot-desc { font-size: 16px; color: var(--text-sub); margin-bottom: 15px; }
+        .nav-btn { 
+            padding: 15px; background: #EBF5FF; color: var(--primary); 
+            border: 2px solid var(--primary); border-radius: 14px; 
+            text-align: center; font-weight: 700; text-decoration: none; font-size: 18px;
+        }
+        .budget-total { 
+            background: var(--dark); color: white; padding: 30px; 
+            border-radius: 24px; text-align: center; margin-bottom: 20px; 
+        }
+        .total-val { font-size: 40px; font-weight: 800; color: var(--accent); display: block; }
+        .total-per { font-size: 20px; opacity: 0.8; }
+        .budget-input { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-bottom: 15px; }
+        input, select { padding: 16px; border-radius: 12px; border: 1px solid #DDD; font-size: 18px; }
+        .trans-card { 
+            background: white; border: 4px solid var(--primary); 
+            padding: 30px 20px; border-radius: 24px; text-align: center; 
+            margin-bottom: 20px; cursor: pointer; transition: 0.2s;
+        }
+        .trans-vn { font-size: 32px; font-weight: 800; color: var(--dark); margin: 15px 0; line-height: 1.3; }
+        .trans-cn { font-size: 20px; color: var(--text-sub); }
+        .tabbar { 
+            position: fixed; bottom: 0; width: 100%; background: rgba(255,255,255,0.9); 
+            backdrop-filter: blur(15px); display: flex; justify-content: space-around; 
+            border-top: 1px solid #DDD; padding: 15px 0 35px 0; z-index: 1000; 
+        }
+        .tab-item { 
+            flex: 1; text-align: center; cursor: pointer; color: var(--text-sub); 
+            font-size: 12px; font-weight: 600; transition: 0.2s; 
+        }
+        .tab-item.active { color: var(--primary); transform: translateY(-5px); }
+        .tab-item span { display: block; font-size: 26px; margin-bottom: 4px; }
+        #fs-overlay { 
+            display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
+            background:white; z-index:2000; justify-content:center; align-items:center; 
+            text-align:center; padding:40px; box-sizing:border-box; cursor:pointer; 
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>🏝️ 富國島 Travel OS</h1>
+    <p>ULTRA PRO MAX+ | 商業級自駕系統</p>
+</header>
+
+<div class="app-container">
+    
+    <!-- HOME -->
+    <div id="home" class="page active">
+        <div class="section-label">📌 關鍵狀態</div>
+        <div class="card" style="border-left: 8px solid var(--danger);">
+            <div class="card-title">🌦 6月雨季預警</div>
+            <div style="font-size: 18px; margin-top: 10px;">
+                預測有陣雨 $\rightarrow$ <strong style="color:var(--danger)">請務必隨車攜帶雨具</strong>
+            </div>
+        </div>
+
+        <div class="section-label">📅 精確行程</div>
+        <div class="day-selector" id="day-selector"></div>
+        <div id="itinerary-content"></div>
+
+        <div class="section-label">🚐 快速操作</div>
+        <div class="card">
+            <div class="btn-group">
+                <button class="btn btn-accent" onclick="navToHotel()">🏠 一鍵回酒店</button>
+                <button class="btn btn-secondary" onclick="switchPage('settings', this)">⚙️ 系統設定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NAV -->
+    <div id="nav" class="page">
+        <div class="section-label">📍 陸路必去目的地</div>
+        <div id="all-spots-list"></div>
+    </div>
+
+    <!-- BUDGET -->
+    <div id="budget" class="page">
+        <div class="section-label">💰 財務分帳系統</div>
+        <div class="budget-total">
+            <span style="font-size:16px; opacity:0.8;">5人總計 (VND)</span>
+            <span class="total-val" id="grand-total">0</span>
+            <span class="total-per">每人分攤: <span id="per-person">0</span></span>
+        </div>
+        <div class="card">
+            <div class="card-title">➕ 新增記錄</div>
+            <div class="budget-input">
+                <input type="number" id="exp-amount" placeholder="輸入金額 (VND)">
+                <select id="exp-cat">
+                    <option>餐飲</option><option>交通</option><option>住宿</option><option>門票</option>
+                </select>
+            </div>
+            <button class="btn" style="width:100%" onclick="addExpense()">確定記錄支出</button>
+        </div>
+        <div class="card">
+            <div class="card-title">📋 支出詳情</div>
+            <div id="expense-list"></div>
+        </div>
+    </div>
+
+    <!-- TRANSLATE -->
+    <div id="translate" class="page">
+        <div class="section-label">💬 越南語生存卡</div>
+        <div class="trans-card" onclick="fullScreenTrans(this)">
+            <div class="cn-text">【最重要】我吃五葷素 (不加蔥、蒜、洋蔥、韭菜)</div>
+            <div class="trans-vn">Tôi ăn chay thuần<br>(Không hành, không tỏi, không hẹ)</div>
+            <div style="font-size:12px; color:#AAA; margin-top:10px;">👉 點擊全屏出示給服務生</div>
+        </div>
+        <div class="trans-card" onclick="fullScreenTrans(this)">
+            <div class="cn-text">請幫我準備素食料理</div>
+            <div class="trans-vn">Làm ơn chuẩn bị món chay cho tôi</div>
+            <div style="font-size:12px; color:#AAA; margin-top:10px;">👉 點擊全屏出示</div>
+        </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="settings" class="page">
+        <div class="section-label">⚙️ 系統設定</div>
+        <div class="card">
+            <div class="card-title">酒店導航配置</div>
+            <div style="margin:20px 0;">
+                <label style="font-size:14px; color:#666;">目前入住酒店</label>
+                <select id="hotel-select" onchange="setHotel()" style="width:100%; padding:16px; margin-top:10px; border-radius:12px; font-size:16px;">
+                    <option value="dusit">Dusit Princess Moonrise Beach</option>
+                    <option value="ocean">Ocean Bay Phu Quoc Resort</option>
+                </select>
+            </div>
+            <div style="margin-top:20px;">
+                <label style="font-size:14px; color:#666;">車牌號碼</label>
+                <input type="text" id="car-plate-input" oninput="updateCarPlate(this.value)" style="width:92%; padding:16px; margin-top:10px; border-radius:12px; font-size:16px;" placeholder="例如: 123-ABC">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="tabbar">
+    <div class="tab-item active" onclick="switchPage('home', this)"><span>🏠</span>主頁</div>
+    <div class="tab-item" onclick="switchPage('nav', this)"><span>🗺️</span>導航</div>
+    <div class="tab-item" onclick="switchPage('budget', this)"><span>💰</span>分帳</div>
+    <div class="tab-item" onclick="switchPage('translate', this)"><span>💬</span>翻譯</div>
+    <div class="tab-item" onclick="switchPage('settings', this)"><span>⚙️</span>設定</div>
+</div>
+
+<div id="fs-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:2000; justify-content:center; align-items:center; text-align:center; padding:40px; box-sizing:border-box; cursor:pointer;">
+    <div>
+        <div id="fs-vn" style="font-size:48px; font-weight:800; margin-bottom:30px; color:var(--primary); line-height:1.2;"></div>
+        <div id="fs-cn" style="font-size:24px; color:#666;"></div>
+        <p style="margin-top:60px; color:#CCC; font-size:16px;">(點擊螢幕任意處關閉)</p>
+    </div>
+</div>
+
+<script>
+    const DATA = {
+        hotels: { 
+            dusit: { name: "Dusit Princess", coord: "10.3425,105.4120" }, 
+            ocean: { name: "Ocean Bay Resort", coord: "10.2150,105.3800" } 
+        },
+        itinerary: {
+            1: [
+                { name: "碼頭抵達 & 領車", time: "09:00", coord: "10.3600,105.4000", info: "坐船抵達 $\rightarrow$ 領車" },
+                { name: "Ganh Dau 碼頭", time: "14:00", coord: "10.4500,105.4200", info: "看柬埔寨邊境" },
+                { name: "VinSafari", time: "16:00", coord: "10.3900,105.4500", info: "陸路野生動物園" }
+            ],
+            2: [
+                { name: "富國島大教堂", time: "10:00", coord: "10.3500,105.3800", info: "市區地標" },
+                { name: "Dinh Cau 廟", time: "14:00", coord: "10.3400,105.3700", info: "海邊祈福廟" },
+                { name: "富國島夜市", time: "19:00", coord: "10.3450,105.3850", info: "素食小吃探索" }
+            ],
+            3: [
+                { name: "Sunset Town (日落小鎮)", time: "10:00", coord: "10.2400,105.3500", info: "地中海風格建築" },
+                { name: "和國寺 (Ho Quoc)", time: "14:00", coord: "10.2800,105.3000", info: "宏偉佛教寺廟" }
+            ],
+            4: [
+                { name: "最後採購", time: "09:00", coord: "10.3400,105.4100", info: "準備返程" },
+                { name: "碼頭回程", time: "13:00", coord: "10.3600,105.4000", info: "交車 $\rightarrow$ 搭船" }
+            ]
+        }
+    };
+
+    let currentDay = 1;
+    let expenses = JSON.parse(localStorage.getItem('pq_expenses') || '[]');
+
+    function switchPage(pageId, el) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active');
+        document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    function setHotel() { localStorage.setItem('pq_hotel', document.getElementById('hotel-select').value); }
+    
+    function navToHotel() {
+        const hKey = localStorage.getItem('pq_hotel') || 'dusit';
+        const coord = DATA.hotels[hKey]?.coord;
+        if (coord) {
+            window.open(`https://www.google.com/maps/dir/?api=1&destination=${coord.trim()}`);
+        }
+    }
+
+    function updateCarPlate(val) {
+        localStorage.setItem('pq_car_plate', val);
+    }
+
+    function renderDaySelector() {
+        const container = document.getElementById('day-selector'); container.innerHTML = '';
+        for(let i=1; i<=4; i++) {
+            const btn = document.createElement('div');
+            btn.className = `day-btn ${i === currentDay ? 'active' : ''}`;
+            btn.innerText = `Day ${i}`;
+            btn.onclick = () => { currentDay = i; renderDaySelector(); renderItinerary(); };
+            container.appendChild(btn);
+        }
+    }
+
+    function renderItinerary() {
+        const content = document.getElementById('itinerary-content');
+        const spots = DATA.itinerary[currentDay];
+        content.innerHTML = '';
+        spots.forEach(s => {
+            content.innerHTML += `
+                <div class="card">
+                    <div class="spot">
+                        <div class="spot-time">${s.time}</div>
+                        <div class="spot-name">${s.name}</div>
+                        <div class="spot-desc">${s.info}</div>
+                        <a class="nav-btn" onclick="window.open('https://www.google.com/maps/dir/?api=1&destination=${s.coord.trim()}')" target="_blank">🗺️ 一鍵導航至目的地</a>
+                    </div>
+                </div>`;
+        });
+    }
+
+    function renderAllSpots() {
+        const container = document.getElementById('all-spots-list');
+        container.innerHTML = '';
+        Object.keys(DATA.itinerary).forEach(day => {
+            DATA.itinerary[day].forEach(s => {
+                container.innerHTML += `
+                    <div class="card">
+                        <div class="spot">
+                            <div class="spot-name">${s.name}</div>
+                            <div class="spot-meta" style="color:#888; margin-bottom:10px;">Day ${day} | ${s.info}</div>
+                            <a class="nav-btn" onclick="window.open('https://www.google.com/maps/dir/?api=1&destination=${s.coord.trim()}')" target="_blank">🗺️ 導航 $\rightarrow$ ${s.name}</a>
+                        </div>
+                    </div>`;
+            });
+        });
+    }
+
+    function addExpense() {
+        const amt = document.getElementById('exp-amount').value;
+        const cat = document.getElementById('exp-cat').value;
+        if(!amt) return;
+        expenses.push({ amt: parseFloat(amt), cat, date: new Date().toLocaleDateString() });
+        localStorage.setItem('pq_expenses', JSON.stringify(expenses));
+        document.getElementById('exp-amount').value = '';
+        renderExpenses();
+    }
+
+    function renderExpenses() {
+        const list = document.getElementById('expense-list');
+        list.innerHTML = ''; let total = 0;
+        expenses.forEach((ex, i) => {
+            total += ex.amt;
+            list.innerHTML += `
+                <div class="spot">
+                    <div class="spot-name">${ex.cat}</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="color:#888; font-size:12px;">${ex.date}</span>
+                        <div style="font-weight:bold">${ex.amt.toLocaleString()} VND 
+                            <span style="color:red; margin-left:10px; cursor:pointer" onclick="deleteExp(${i})">✕</span>
+                        </div>
+                    </div>
+                </div>`;
+        });
+        document.getElementById('grand-total').innerText = total.toLocaleString();
+        document.getElementById('per-person').innerText = (total / 5).toLocaleString();
+    }
+
+    function deleteExp(i) {
+        expenses.splice(i, 1); localStorage.setItem('pq_expenses', JSON.stringify(expenses)); renderExpenses();
+    }
+
+    function fullScreenTrans(el) {
+        document.getElementById('fs-vn').innerText = el.querySelector('.trans-vn').innerText;
+        document.getElementById('fs-cn').innerText = el.querySelector('.cn-text').innerText;
+        document.getElementById('fs-overlay').style.display = 'flex';
+    }
+
+    document.getElementById('fs-overlay').onclick = function() { this.style.display = 'none'; };
+
+    window.onload = () => {
+        renderDaySelector(); renderItinerary(); renderAllSpots(); renderExpenses();
+        const savedHotel = localStorage.getItem('pq_hotel'); if(savedHotel) document.getElementById('hotel-select').value = savedHotel;
+        const savedPlate = localStorage.getItem('pq_car_plate'); if(savedPlate) {
+            document.getElementById('car-plate-input').value = savedPlate;
+        }
+    };
+</script>
+</body>
+</html>

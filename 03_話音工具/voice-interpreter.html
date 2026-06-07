@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🎤 即時語音翻譯 Voice Interpreter</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0a0a18;
+  --card:#12122a;
+  --border:#1e1e40;
+  --zh:#FF6B6B;
+  --en:#4ECDC4;
+  --vi:#FFE66D;
+  --txt:#e0e0f0;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;display:flex;flex-direction:column;padding:0;padding-bottom:80px}
+.top{padding:16px 16px 12px;text-align:center;background:linear-gradient(180deg,#12122a 0%,transparent 100%)}
+.top h1{font-size:1.5em;color:#FFD700;margin-bottom:2px}
+.top p{color:#555;font-size:0.8em}
+
+/* Language selector */
+.lang-row{display:flex;align-items:center;justify-content:center;gap:10px;margin:12px 0 16px}
+.lang-row select{padding:10px 14px;border-radius:12px;border:2px solid var(--border);background:var(--card);color:var(--txt);font-size:1em;cursor:pointer;appearance:none;-webkit-appearance:none}
+.lang-row select:focus{outline:none;border-color:#FFD700}
+.arrow{font-size:1.5em;color:#FFD700;flex-shrink:0}
+
+/* Main mic button */
+.mic-zone{display:flex;flex-direction:column;align-items:center;gap:16px;margin:10px 0 24px}
+.mic-btn{width:110px;height:110px;border-radius:50%;border:4px solid var(--border);background:linear-gradient(145deg,#1a1a35,#101025);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;position:relative}
+.mic-btn.rec{ border-color:#FF4444;background:linear-gradient(145deg,#2a1020,#1a0a15);animation:pulse 1.5s infinite}
+.mic-btn.rec svg{filter:drop-shadow(0 0 8px #FF4444)}
+.mic-btn svg{width:44px;height:44px;fill:#888;transition:fill 0.2s}
+.mic-btn:hover svg{fill:#FFD700}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,68,68,0.4)}50%{box-shadow:0 0 0 18px rgba(255,68,68,0)}}
+.mic-label{font-size:0.85em;color:#666;text-align:center}
+.mic-label.rec{color:#FF4444;font-weight:bold}
+
+/* Transcript */
+.transcript-box{background:var(--card);border:2px solid var(--border);border-radius:16px;margin:0 16px 14px;padding:14px;min-height:72px}
+.transcript-box .from-label{font-size:0.72em;color:#555;margin-bottom:6px}
+.ttext{font-size:1.05em;line-height:1.5;color:#ccc;word-break:break-word}
+.ttext.empty{color:#444;font-style:italic}
+
+/* Translation output */
+.out-box{background:var(--card);border:2px solid var(--border);border-radius:16px;margin:0 16px 14px;padding:14px;min-height:72px}
+.out-box .to-label{font-size:0.72em;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.lang-tag{padding:2px 8px;border-radius:6px;font-size:0.7em;font-weight:bold}
+.lang-tag.zh{background: var(--zh);color:#fff}
+.lang-tag.en{background: var(--en);color:#000}
+.lang-tag.vi{background: var(--vi);color:#000}
+.otext{font-size:1.05em;line-height:1.5;color:#FFD700;word-break:break-word}
+.otext.empty{color:#444;font-style:italic}
+.err-msg{font-size:0.85em;color:#FF6B6B;text-align:center;padding:8px}
+
+/* Auto-play toggle */
+.opts{display:flex;justify-content:center;gap:16px;margin:0 16px 12px;align-items:center}
+.opts label{font-size:0.82em;color:#666;display:flex;align-items:center;gap:6px;cursor:pointer}
+.toggle{padding:8px 16px;border-radius:10px;border:2px solid var(--border);background:var(--card);color:var(--txt);font-size:0.82em;cursor:pointer;transition:all 0.2s}
+.toggle.on{ border-color:#FFD700;background:#FFD70020;color:#FFD700}
+
+/* Speak button */
+.speak-btn{display:block;width:calc(100% - 32px);margin:0 auto 16px;padding:14px;border-radius:14px;border:none;font-size:1.05em;font-weight:bold;cursor:pointer;background:linear-gradient(135deg,#FF6B6B,#FF8E53);color:#fff;transition:opacity 0.2s}
+.speak-btn:disabled{opacity:0.35;cursor:not-allowed}
+
+/* Status bar */
+.status{text-align:center;font-size:0.78em;color:#444;padding:0 16px;margin-top:auto}
+
+/* Demo phrases */
+.demo{margin:0 16px 16px}
+.demo-h{font-size:0.82em;color:#555;margin-bottom:8px;padding-left:2px}
+.dlist{display:flex;flex-wrap:wrap;gap:8px}
+.dtag{padding:8px 12px;background:var(--card);border:2px solid var(--border);border-radius:10px;font-size:0.8em;cursor:pointer;transition:all 0.15s}
+.dtag:active{background:#1e1e3a;border-color:#FFD700}
+.dtag span{color:#666}
+</style>
+</head>
+<body>
+<div class="top">
+<h1>🎤 即時語音翻譯</h1>
+<p>Voice Interpreter — 說話翻譯 即時播放</p>
+</div>
+
+<div class="lang-row">
+<select id="fromLang" onchange="reset()">
+<option value="zh-TW">🇨🇳 中文</option>
+<option value="en-US">🇺🇸 英文</option>
+<option value="vi-VN">🇻🇳 越南文</option>
+</select>
+<span class="arrow">→</span>
+<select id="toLang" onchange="reset()">
+<option value="vi-VN">🇻🇳 越南文</option>
+<option value="en-US">🇺🇸 英文</option>
+<option value="zh-TW">🇨🇳 中文</option>
+</select>
+</div>
+
+<div class="mic-zone">
+<button class="mic-btn" id="micBtn" onclick="toggleRec()">
+<svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+</button>
+<div class="mic-label" id="micLabel">點擊麥克風開始說話</div>
+</div>
+
+<div class="transcript-box">
+<div class="from-label" id="fromLabel">你說的（中文）：</div>
+<div class="ttext empty" id="ttext">— 等待說話 —</div>
+</div>
+
+<div class="out-box">
+<div class="to-label">
+<span class="lang-tag" id="toTag">越南文</span>
+<span id="toLabel">翻譯結果：</span>
+</div>
+<div class="otext empty" id="otext">— 等待翻譯 —</div>
+</div>
+
+<div class="opts">
+<label><input type="checkbox" id="autoPlay" checked style="display:none"><button class="toggle on" id="autoBtn" onclick="toggleAuto()">🔊 自動播放譯文</button></label>
+</div>
+
+<button class="speak-btn" id="speakBtn" onclick="speakOut()" disabled>▶ 播放翻譯結果</button>
+
+<div class="demo">
+<div class="demo-h">💡 常用翻譯示範（點擊測試）：</div>
+<div class="dlist">
+<div class="dtag" onclick="demo('zh-TW','vi-VN','我是素食者')">素食者 <span>→</span> 越南文</div>
+<div class="dtag" onclick="demo('zh-TW','en-US','請不要魚露')">不要魚露 <span>→</span> 英文</div>
+<div class="dtag" onclick="demo('vi-VN','zh-TW','Tôi ăn chay')">越南文 <span>→</span> 中文</div>
+<div class="dtag" onclick="demo('en-US','vi-VN','How much?')">英文 <span>→</span> 越南文</div>
+<div class="dtag" onclick="demo('vi-VN','en-US','Cứu tôi!')">救命 <span>→</span> 英文</div>
+</div>
+</div>
+
+<div class="status" id="status">支援 Chrome · Edge · Safari（iOS）</div>
+
+<script>
+// ── State ──
+var rec=null;
+var isRec=false;
+var transcript="";
+var translated="";
+var autoPlay=true;
+
+// ── Translation map (offline mini dictionary) ──
+var TRANS={
+  "zh-TW":{
+    "vi-VN":{
+      "我是素食者":"Tôi ăn chay",
+      "請不要魚露":"Không nước mắm",
+      "多少錢？":"Bao nhiêu tiền?",
+      "謝謝":"Cảm ơn",
+      "你好":"Xin chào",
+      "廁所在哪裡？":"Nhà vệ sinh ở đâu?",
+      "救命！":"Cứu tôi!",
+      "我叫救護車":"Gọi xe cấp cứu",
+      "我迷路了":"Tôi bị lạc đường",
+      "太貴了":"Đắt quá",
+      "便宜一點？":"Giảm giá được không?",
+      "我要這個":"Tôi muốn cái này",
+      "不需要了，謝謝":"Không cần, cảm ơn",
+      "太好吃了！":"Ngon quá!",
+      "請少辣":"Ít cay thôi",
+      "有素食嗎？":"Có đồ chay không?",
+      "我不舒服":"Tôi không khỏe",
+      "請給我一杯水":"Cho tôi một ly nước"
+    },
+    "en-US":{
+      "我是素食者":"I am vegetarian",
+      "請不要魚露":"No fish sauce please",
+      "多少錢？":"How much?",
+      "謝謝":"Thank you",
+      "你好":"Hello",
+      "廁所在哪裡？":"Where is the restroom?",
+      "救命！":"Help!",
+      "我叫救護車":"Call an ambulance",
+      "我迷路了":"I am lost",
+      "太貴了":"Too expensive",
+      "便宜一點？":"Can you lower the price?",
+      "我要這個":"I want this one",
+      "不需要了，謝謝":"No thanks",
+      "太好吃了！":"Very delicious!",
+      "請少辣":"Less spicy please",
+      "有素食嗎？":"Do you have vegetarian options?",
+      "我不舒服":"I feel unwell",
+      "請給我一杯水":"Please give me a glass of water"
+    }
+  },
+  "en-US":{
+    "zh-TW":{
+      "I am vegetarian":"我是素食者",
+      "no fish sauce":"請不要魚露",
+      "how much":"多少錢？",
+      "thank you":"謝謝",
+      "hello":"你好",
+      "where is the restroom":"廁所在哪裡？",
+      "help":"救命！",
+      "call an ambulance":"我叫救護車",
+      "i am lost":"我迷路了",
+      "too expensive":"太貴了",
+      "can you lower the price":"便宜一點？",
+      "i want this":"我要這個",
+      "no thanks":"不需要了，謝謝",
+      "very delicious":"太好吃了！",
+      "less spicy please":"請少辣",
+      "i feel unwell":"我不舒服",
+      "please give me water":"請給我一杯水"
+    },
+    "vi-VN":{
+      "i am vegetarian":"Tôi ăn chay",
+      "how much":"Bao nhiêu tiền?",
+      "thank you":"Cảm ơn",
+      "hello":"Xin chào",
+      "help":"Cứu tôi!",
+      "where is the restroom":"Nhà vệ sinh ở đâu?",
+      "i am lost":"Tôi bị lạc đường",
+      "too expensive":"Đắt quá",
+      "i want this":"Tôi muốn cái này",
+      "very delicious":"Ngon quá!",
+      "less spicy please":"Ít cay thôi",
+      "i feel unwell":"Tôi không khỏe"
+    }
+  },
+  "vi-VN":{
+    "zh-TW":{
+      "Tôi ăn chay":"我是素食者",
+      "Không nước mắm":"請不要魚露",
+      "Bao nhiêu tiền":"多少錢？",
+      "Cảm ơn":"謝謝",
+      "Xin chào":"你好",
+      "Nhà vệ sinh ở đâu":"廁所在哪裡？",
+      "Cứu tôi":"救命！",
+      "Gọi xe cấp cứu":"我叫救護車",
+      "Tôi bị lạc đường":"我迷路了",
+      "Đắt quá":"太貴了",
+      "Giảm giá được không":"便宜一點？",
+      "Tôi muốn cái này":"我要這個",
+      "Không cần, cảm ơn":"不需要了，謝謝",
+      "Ngon quá":"太好吃了！",
+      "Ít cay thôi":"請少辣",
+      "Tôi không khỏe":"我不舒服",
+      "Cho tôi một ly nước":"請給我一杯水"
+    },
+    "en-US":{
+      "Tôi ăn chay":"I am vegetarian",
+      "Không nước mắm":"No fish sauce please",
+      "Bao nhiêu tiền":"How much?",
+      "Cảm ơn":"Thank you",
+      "Xin chào":"Hello",
+      "Nhà vệ sinh ở đâu":"Where is the restroom?",
+      "Cứu tôi":"Help!",
+      "Gọi xe cấp cứu":"Call an ambulance",
+      "Tôi bị lạc đường":"I am lost",
+      "Đắt quá":"Too expensive",
+      "Giảm giá được không":"Can you lower the price?",
+      "Tôi muốn cái này":"I want this one",
+      "Không cần, cảm ơn":"No thanks",
+      "Ngon quá":"Very delicious!",
+      "Ít cay thôi":"Less spicy please",
+      "Tôi không khỏe":"I feel unwell",
+      "Cho tôi một ly nước":"Please give me a glass of water"
+    }
+  }
+};
+
+function getLangName(code){
+  if(code==="zh-TW")return "中文";
+  if(code==="en-US")return "英文";
+  if(code==="vi-VN")return "越南文";
+  return code;
+}
+
+function getTagClass(code){
+  if(code==="zh-TW")return "zh";
+  if(code==="en-US")return "en";
+  if(code==="vi-VN")return "vi";
+  return "";
+}
+
+function translate(text,from,to){
+  // Try exact match first
+  var map=TRANS[from];
+  if(map && map[to]){
+    var t=map[to][text.toLowerCase()];
+    if(t)return t;
+    // try partial match
+    for(var k in map[to]){
+      if(text.toLowerCase().includes(k.toLowerCase()))return map[to][k];
+    }
+  }
+  return null;
+}
+
+function updateTag(){
+  var to=document.getElementById("toLang").value;
+  document.getElementById("toTag").textContent=getLangName(to);
+  document.getElementById("toTag").className="lang-tag "+getTagClass(to);
+}
+
+function setFromLabel(){
+  var from=document.getElementById("fromLang").value;
+  document.getElementById("fromLabel").textContent="你說的（"+getLangName(from)+"）：";
+}
+
+// ── Mic / Speech Recognition ──
+function toggleRec(){
+  if(isRec){
+    stopRec();
+  }else{
+    startRec();
+  }
+}
+
+function startRec(){
+  if(!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)){
+    document.getElementById("status").textContent="❌ 你的瀏覽器不支援語音辨識，請用 Chrome";
+    return;
+  }
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  rec=new SR();
+  rec.lang=document.getElementById("fromLang").value;
+  rec.interimResults=false;
+  rec.continuous=true;
+  rec.maxAlternatives=1;
+
+  rec.onstart=function(){
+    isRec=true;
+    document.getElementById("micBtn").classList.add("rec");
+    document.getElementById("micLabel").classList.add("rec");
+    document.getElementById("micLabel").textContent="🔴 錄音中... 再次點擊停止";
+    document.getElementById("ttext").classList.remove("empty");
+    transcript="";
+  };
+
+  rec.onresult=function(event){
+    var result=event.results[event.results.length-1];
+    if(result.isFinal){
+      transcript=result[0].transcript.trim();
+      document.getElementById("ttext").textContent=transcript;
+      doTranslate();
+    }
+  };
+
+  rec.onerror=function(event){
+    if(event.error==="no-speech")return;
+    document.getElementById("status").textContent="❌ 錯誤："+event.error;
+    stopRec();
+  };
+
+  rec.onend=function(){
+    isRec=false;
+    document.getElementById("micBtn").classList.remove("rec");
+    document.getElementById("micLabel").classList.remove("rec");
+    document.getElementById("micLabel").textContent="點擊麥克風開始說話";
+  };
+
+  rec.start();
+}
+
+function stopRec(){
+  if(rec)rec.stop();
+}
+
+function reset(){
+  stopRec();
+  transcript="";
+  translated="";
+  document.getElementById("ttext").textContent="— 等待說話 —";
+  document.getElementById("ttext").classList.add("empty");
+  document.getElementById("otext").textContent="— 等待翻譯 —";
+  document.getElementById("otext").classList.add("empty");
+  document.getElementById("speakBtn").disabled=true;
+  setFromLabel();
+  updateTag();
+}
+
+function doTranslate(){
+  var from=document.getElementById("fromLang").value;
+  var to=document.getElementById("toLang").value;
+  var res=translate(transcript,from,to);
+  if(res){
+    translated=res;
+    document.getElementById("otext").textContent=translated;
+    document.getElementById("otext").classList.remove("empty");
+    document.getElementById("speakBtn").disabled=false;
+    document.getElementById("status").textContent="✅ 已翻譯";
+    if(autoPlay)speakOut();
+  }else{
+    translated="";
+    document.getElementById("otext").textContent="⚠️ 詞庫暫無此句，嘗試簡化說法";
+    document.getElementById("otext").classList.remove("empty");
+    document.getElementById("speakBtn").disabled=true;
+    document.getElementById("status").textContent="📝 詞庫無匹配，可用下方演示測試";
+  }
+}
+
+// ── TTS ──
+function speakOut(){
+  if(!translated)return;
+  window.speechSynthesis.cancel();
+  var to=document.getElementById("toLang").value;
+  var u=new SpeechSynthesisUtterance(translated);
+  u.lang=to;
+  u.rate=0.85;
+  var vl=to.split("-")[0];
+  var voices=window.speechSynthesis.getVoices();
+  if(voices.length===0)window.speechSynthesis.getVoices();
+  var pref=voices.filter(function(v){return v.lang.startsWith(vl);});
+  if(pref.length>0){
+    var nat=pref.find(function(v){return v.localService||v.name.includes("Enhanced");});
+    u.voice=nat||pref[0];
+  }
+  window.speechSynthesis.speak(u);
+}
+
+// ── Demo ──
+function demo(from,to,text){
+  document.getElementById("fromLang").value=from;
+  document.getElementById("toLang").value=to;
+  setFromLabel();
+  updateTag();
+  transcript=text;
+  document.getElementById("ttext").textContent=text;
+  document.getElementById("ttext").classList.remove("empty");
+  doTranslate();
+}
+
+function toggleAuto(){
+  autoPlay=!autoPlay;
+  var btn=document.getElementById("autoBtn");
+  btn.classList.toggle("on",autoPlay);
+}
+
+// Init
+setFromLabel();
+updateTag();
+window.speechSynthesis.getVoices();
+window.speechSynthesis.onvoiceschanged=function(){window.speechSynthesis.getVoices();};
+</script>
+</body>
+</html>

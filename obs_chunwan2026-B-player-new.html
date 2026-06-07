@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>春願班 顯示屏</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; background: #000; color: #fff; font-family: Arial, "PingFang TC", "Microsoft JhengHei", sans-serif; overflow: hidden; }
+#player-bg { position: fixed; inset: 0; display: flex; flex-direction: column; }
+#player-zh { flex: 0 0 auto; padding: 40px 50px 20px; text-align: center; font-size: 32px; line-height: 2; color: #FFD700; font-weight: bold; }
+#player-en { flex: 1; display: flex; align-items: flex-start; justify-content: center; padding: 10px 50px 40px; text-align: center; font-size: 20px; line-height: 1.7; color: #FFEC8B; font-style: italic; }
+#player-num { position: fixed; bottom: 8px; right: 12px; font-size: 12px; color: #555; }
+.en-text { font-style: italic; }
+.divider-bg { display:flex; flex-direction:column; justify-content:center; align-items:center; height:100vh; text-align:center; }
+.divider-bg .d-title { font-size:44px; color:#FFD700; font-weight:bold; }
+.title-bg { display:flex; flex-direction:column; justify-content:center; align-items:center; height:100vh; text-align:center; }
+.title-bg .t-year { font-size:14px; letter-spacing:6px; color:rgba(255,220,100,0.5); margin-bottom:16px; }
+.title-bg .t-main { font-size:56px; color:#FFD700; font-weight:bold; letter-spacing:6px; }
+</style>
+</head>
+<body>
+<div id="player-bg">
+  <div id="player-zh"></div>
+  <div id="player-en"></div>
+  <div id="player-num"></div>
+</div>
+<script>
+var slides = [
+    {"zh": "2026歲次丙午年春願班", "en": "", "divider": false},
+    {"zh": "第一段12:45~1:55 王經理", "en": "", "divider": true},
+    {"zh": "時光荏苒，光陰如梭，又是一年春暖花開。", "en": "Time flies —another spring has come again.", "divider": false},
+    {"zh": "春願班之成立，是幸是福，令修道人有机会在此乱世之中發願提振。", "en": "The establishment of the “Spring Aspiration Class” is both a blessing and a fortune, giving cultivators an opportunity, in this chaotic world, to make vows and uplift themselves.", "divider": false},
+    {"zh": "更於此時，低調而行，努力往前，深怕 我們能有多少時間能修辦? 蓋無人可 知、仙佛神聖亦不知，唯老母娘知曉矣。", "en": "At this moment, we must proceed quietly and diligently, striving forward, yet with a sense of urgency—how much time do we truly have to cultivate and practice? No one knows; even immortals, Buddhas, and divine beings do not know. Only the Heavenly Mother alone is aware.", "divider": false},
+    {"zh": "此時勢瞬息萬變，付出?收穫?好壞? 都是自己，人不知,天却一清二楚。", "en": "In these times, circumstances change in the blink of an eye. What we give, what we receive, what is good or bad—all of it comes from ourselves. Others may not see, but Heaven knows everything with perfect clarity.", "divider": false},
+    {"zh": "修道必修身、修身必修心。身素，口素，意素(身口意都会造罪亦可造德)", "en": "To cultivate the Tao, one must first cultivate oneself; and to cultivate oneself, one must cultivate the mind. Purity in body, purity in speech, purity in thought—body, speech, and mind can all create wrongdoing, but they can also create virtue.", "divider": false},
+    {"zh": "@唐朝宰相斐休，一日上山踏青,見數位修行人談論 “無明火“。斐上前請教何也？", "en": "During the Tang Dynasty, a prime minister named Pei Xiu went hiking in the mountains one day. He saw several cultivators discussing something called “the fire of ignorance” (anger caused by ignorance). Curious, he went up and asked what it meant.", "divider": false},
+    {"zh": "长者言:『堂堂一朝宰相,竟然不知何為無明火,可謂無知至極。』", "en": "An elder replied, “You are a great prime minister, yet you don’t even know what ‘the fire of ignorance’ is. That is truly ignorance.”", "divider": false},
+    {"zh": "斐听完,立刻火冒三丈對曰:『吾非印度人，那裡知道這番邦言辭已?』長者曰:『此乃”“無明火”矣 』", "en": "After hearing this, Pei Xiu became very angry and said, “I am not from India—how would I know such foreign terms?” The elder smiled and said, “That—right there—is the ‘fire of ignorance.’” ", "divider": false},
+    {"zh": "上火，心即黑暗。當心中平靜無波時，心即 光明。", "en": "When anger arises, the mind becomes dark.<br> When the mind is calm and peaceful, it becomes bright.", "divider": false},
+    {"zh": "一個人的成功是懂得自我反省， 不会意氣用事，不受情緒主宰。", "en": "A successful person knows how to reflect on themselves.<br> They do not act impulsively or let emotions control them.", "divider": false},
+    {"zh": "此故事之啟示:「人們往往為了一時的感情 衝動，压制不了这心頭的怒火時，再怎么恩愛的夫妻，可以因此而分離，再好的朋友也可以因此而反目成、而修道者、再大的功德，也能因此而毀於一旦，相信這是誰也 無法想像的。」", "en": "The lesson of the story:<br> People often act on impulse and cannot control their anger. Even loving couples can separate because of one moment of anger. Close friends can become enemies. Even a cultivator’s great merits can be destroyed in an instant. This is something many people cannot imagine.", "divider": false},
+    {"zh": "詩云:「一念嗔心起，百萬障門開。」", "en": "There is a saying:<br> “When one thought of anger arises, a million obstacles appear.”", "divider": false},
+    {"zh": "一個怒氣產生，却打開了百萬的冤孽之門。 能無慎乎? 冤孽他欠一旦進入討債程序，我們一心想收拾阻擋，就必须以百萬倍的努力，还不一定能解決。", "en": "One moment of anger can open the door to countless karmic troubles. Shouldn’t we be careful? Once these karmic debts begin to return, it takes tremendous effort to resolve them—and even then, it may not be successful.", "divider": false},
+    {"zh": "一些人，一旦大發脾氣，火冒三丈，任何人說，任何人勸，都没有用。可憐啊!", "en": "Some people lose their temper so badly that no one can calm them down. It is truly unfortunate.", "divider": false},
+    {"zh": "我們人的眼，可以往前看，却不能往內看，怎么办呢?唯有以心忏悔這條路了。", "en": "Our eyes can look outward, but not inward—so what should we do?<br> The only way is through sincere repentance in the heart. ", "divider": false},
+    {"zh": "師尊老大人慈示:「人是感情的動物,故情 緒常有高潮低潮,喜怒形於外的表现 有時,未能自治自律,常会把脾氣遷怒 於他人的行為,隨着環境而使心境 变化萬千,不能自主,往往因小事的磨擦 誤會,而使無明火以及瞋怒之氣燥發。", "en": "Our Heavenly Teacher once said:<br> Humans are emotional beings. Our moods rise and fall. Sometimes we cannot control ourselves and take our anger out on others. Our emotions change with the environment, and we lose control. Small misunderstandings can trigger anger and resentment.", "divider": false},
+    {"zh": "有些人發脾氣,才說我不是故意的,但通常 傷害已形成", "en": "Some people say, “I didn’t mean it,” after getting angry—but the damage is already done.", "divider": false},
+    {"zh": "孔子稱赞颜回的不二過，不遷怒。聖人亦有不足之嘆。", "en": "Confucius praised Yan Hui for “not repeating mistakes and not taking anger out on others.” Even sages felt this was difficult. ", "divider": false},
+    {"zh": "我們人是團體共生群体活動於間。故人与人之間的人倫關係，必要維護好，甚處五倫与修道息息相關矣。", "en": "Humans live together in society, so relationships must be well maintained.<br> The Five Relationships are closely connected to Tao cultivation. ", "divider": false},
+    {"zh": "「故修身培養內涵(修養)的進步,是在擺脫情緒反應之束縛,解脫自我 主觀的支配。」", "en": "To improve oneself (true cultivation), one must break free from emotional reactions and subjective thinking.", "divider": false},
+    {"zh": "常鬧情緒之人，陰晴不定，常令人退避三舍。主观太强，修道难進步。", "en": "People who are always emotional and unstable make others want to avoid them.<br> If one is too self-centered, it is hard to progress in cultivation. ", "divider": false},
+    {"zh": "如何解呢?", "en": "How do we solve this?", "divider": false},
+    {"zh": "解方:以冷靜的心情來應变動亂 以判斷的思考未明辨是非 以熱誠的態度來待人接物", "en": "Solutions: Face chaos with a calm mind Use clear thinking to judge right and wrong Treat others with sincerity and kindness ", "divider": false},
+    {"zh": "道場之亂，是人心亂引起!如此就可以管好自己的情緒，提升心性修養。", "en": "Disorder in a spiritual community comes from disorder in people’s hearts.<br> If we can manage our emotions, we can improve our character. ", "divider": false},
+    {"zh": "道場中年輕一代不可輕視,其來歷不简单", "en": "Young people in the spiritual community should not be underestimated—their backgrounds are not simple.", "divider": false},
+    {"zh": "费城有位10歲女孩。她渡了学校老師一家 以及校長。", "en": "In Philadelphia, a 10-year-old girl guided her teacher’s whole family and even the principal to embrace Tao.", "divider": false},
+    {"zh": "溫哥華有三位小孩,都未成年,最小8歲 吵著母親開車5小時,前往溫哥華来請示清口,前輩鼓勵他們先受行功、清口等長大成熟後再說。(許多再來人、前世 有修,根基甚是不淺已)", "en": "In Vancouver, three children (the youngest only 8 years old) insisted on traveling 5 hours to ask the permission from the master to Qīng kǒu. The master encouraged us to focus on cultivation and growth first. (Many of these children may have cultivated in past lives and have strong foundations.) P1. 理事慈示:蓋天下萬物. Li Shi (Senior Master) also said:<br> Everything in life is like a test paper.", "divider": false},
+    {"zh": "一張考試卷分下來,為了讓我們在这方面(考題) 更堅強,更成熟,能长大能照顧人。而不是如“豆腐”提不起,放不下!", "en": "It is meant to make us stronger, more mature, and able to care for others—not weak and unable to handle responsibility.", "divider": false},
+    {"zh": "@中大獎却無福消受。", "en": "Story: Having fortune but unable to enjoy it", "divider": false},
+    {"zh": "一人問神明,將得大獎，將全部押注，心中忐忑,告其妻，若得中獎,则撐傘以回。", "en": "A man was told by a deity that he would win a big prize. He bet everything he had. He told his wife that if he won, she would come home holding an umbrella.", "divider": false},
+    {"zh": "私自站於二樓看，其妻從卷行回，得知中獎，却忘了撐傘而回，夫見無傘，哀傷墜樓而亡。", "en": "He secretly watched from upstairs. His wife returned happily—but forgot to bring an umbrella. Thinking he had lost, the man became so upset that he fell to his death.", "divider": false},
+    {"zh": "有福却無份享用:枉然矣。", "en": "He had the fortune—but not the destiny to enjoy it. What a waste.", "divider": false},
+    {"zh": "@澳洲有一人才，諸事不顺，送医急救急救車司機驚覺，後車不见病人，急停車 察视,担架與病人，在不近的車道上急着回頭載上急救車。", "en": "Another story: In Australia, a talented man had constant bad luck. One day, while being rushed to the hospital, the ambulance driver suddenly realized the patient had fallen off the vehicle. They quickly turned back to retrieve him.", "divider": false},
+    {"zh": "其妻(病人)夢中有人告知，其夫之考試卷沒有完成。因此冤欠來討債，蓋因功德不夠。", "en": "Later, his wife dreamed that someone told her:<br> “Your husband’s life test is not complete. Past karmic debts are now being repaid because his merits are insufficient.”", "divider": false},
+    {"zh": "故前往請示前輩上交了願功德費，並發願勤行，才停止此段期間之不顺。", "en": "After seeking guidance, they made vows and practiced diligently. Only then did the misfortune stop.", "divider": false},
+    {"zh": "課題一詩云:	詩經·小雅 Book of Odes", "en": "", "divider": false},
+    {"zh": "1周道如砥 		The right path is smooth and straight", "en": "", "divider": false},
+    {"zh": "2其直如矢		Straight like an arrow", "en": "", "divider": false},
+    {"zh": "3君子所履		The noble person walks this path", "en": "", "divider": false},
+    {"zh": "4小人所視。		The ignorant only watch but do not understand", "en": "", "divider": false},
+    {"zh": "1低心下氣為衆生奴", "en": "Be humble and serve others", "divider": false},
+    {"zh": "2大道平坦無崎岖", "en": "The Great Way is smooth and without obstacles", "divider": false},
+    {"zh": "3君子來實行之", "en": "The wise practice it", "divider": false},
+    {"zh": "4 小人指不明理之人，不懂的人来学之.", "en": "The ignorant must learn to understand it", "divider": false},
+    {"zh": "1:56~3:30 講员(第二段)", "en": "", "divider": true},
+    {"zh": "1老前人之例：被潑一盆水，不瞋不怒，却言感謝您為我洗塵。我們修道是靠天吃飯的，一股誠心力量即生。", "en": "Example from the Great Master: The Great Master was once splashed with a bucket of water. He did not get angry. Instead, he said,“Thank you for helping wash away my dust.” In cultivation, we rely on Heaven. When we have sincere faith, a strong inner power naturally arises. ", "divider": false},
+    {"zh": "曾子日:『士不可以不弘設、任重而道遠，仁以為己任，不亦重乎，死而後已，不亦遠乎。』", "en": "Zengzi once said:<br> “A person of virtue must be broad-minded and strong, for the responsibility is heavy and the journey is long. Taking benevolence as one’s duty—is this not heavy? Continuing until death—is this not far-reaching?”", "divider": false},
+    {"zh": "琢玉→雕琢玉佛,將無用之處敲掉芝蘭生於深林,不以無人而不芳 君子修道立德，不為窮困而改節。 當人心想占有“物”時,必帶來爭執。", "en": "Polishing jade is like carving a jade Buddha—removing what is unnecessary. Orchid flowers grow deep in the forest; they still give off fragrance even when no one sees them. A noble person cultivates virtue and does not change their principles because of poverty or hardship. When people desire to possess things, it often leads to conflict. ", "divider": false},
+    {"zh": "3:35~5:00pm 經理(第三段)", "en": "", "divider": true},
+    {"zh": "P4 上天大慈下雨露..有根的得水滋潤，能长青翠茁壯， 無根的得水反而腐爛，荆棘得水之滋潤，却长出来傷人。 故聽者参差，程度不同，結果各異。", "en": "Heaven sends down rain to nourish all things. Plants with roots absorb the water and grow strong and green Plants without roots rot Thorny plants grow stronger and may harm others So, when people hear the same teaching, their understanding and results will differ. ", "divider": false},
+    {"zh": "當年老前人所往台湾之前，師毋叮嚀。說實話，辦實事”。", "en": "Before going to Taiwan, the Great Master was instructed by Shi Mu: “Speak honestly. Do real work.”", "divider": false},
+    {"zh": "老前人帶牢記於心浩然正氣而建立，興毅之基礎。", "en": "He held onto this with an upright spirit and established a strong foundation for Xing-Yi.", "divider": false},
+    {"zh": "清口人才，並非每个的懂得修懂得做，他们仍在观望之中，蓋前世今世之程度各異。雖清口已久，有些仍未受上天肯定。 有些只是看到修道人的不足或戾氣外露，最後選擇離道!", "en": "Not everyone who joins cultivation truly understands or practices it. Many are still observing. People’s levels differ from past and present lives. Some, even after a long time, are not yet recognized by Heaven. Some only see the faults or negativity of others and eventually leave the path.", "divider": false},
+    {"zh": "深研 多學多聽多體會。", "en": "So we must study deeply. Learn more, listen more and experience more", "divider": false},
+    {"zh": "現代科技超前，令人咋舌驚異，AI使人的享受漸趨極致。", "en": "Modern technologies are very advanced. AI allows people to enjoy life more than ever.", "divider": false},
+    {"zh": "50年前的人:物慾 較少，孩子們玩小石頭就很欢喜渡日。 现代的孩子，家长要花錢買玩具，喜新厭舊。", "en": "50 years ago: people had fewer desires; children were happy playing with small rocks.<br>Today: children want new toys constantly.", "divider": false},
+    {"zh": "以前的人担心没飯吃，现代的人担心飯吃多。因為人倫墜落,父子因利益錢財反目成仇, 甚是悲哀啊!", "en": "In the past, people worried about not having enough food. Today, people worry about eating too much. Because human relationships have declined, even family members may become enemies over money. This is very sad. ", "divider": false},
+    {"zh": "目前天時走到智時仁→義→禮→智→ 信", "en": "We are now in an age of “wisdom” in the sequence:<br> Benevolence → Righteousness → Propriety → Wisdom → Trust ", "divider": false},
+    {"zh": "是故各种發明勝过往常，修道就是要格物，格物就是控制自己内心慾望。一格物致知,一層一層的提升。", "en": "Cultivation means controlling our inner desires. Step by step, we improve our understanding and awareness. ", "divider": false},
+    {"zh": "若我們的心性無法堅達，正氣不旺，灵性之心暗淡，必招致冤欠来作弄，鬼神來欺負。一旦灵性光明，冤欠必不敢造次侵擾。 正義就是我們灵性的光。", "en": "If our inner strength is weak and our righteous energy is low, our spiritual light becomes dim. This can attract negative karmic forces or troubles. But when our spirit is bright, these forces do not dare to disturb us. Righteousness is the light of our soul.", "divider": false},
+    {"zh": "“一忍以擋百勇、一靜川制百動”人一清靜,则性本善。(现代人多數無法平静 蓋周外物引誘太多)", "en": "There is a saying:<br> “One moment of patience can overcome a hundred acts of courage.<br> One moment of calm can control a hundred movements.” When a person is calm, their original nature (goodness) appears. ", "divider": false},
+    {"zh": "@澳洲有位坛主出差、住Hotel夢中見許多冤魂來討債,坛主說,吾何時欠汝們?", "en": "In Australia, a holy house owner once dreamed of many spirits coming to claim debts. He asked, “When did I owe you?”", "divider": false},
+    {"zh": "冤欠回,非汝,乃是你祖先所欠,“父债子还”, 但是你有設坛,我們沒你的辦法,会找你們的親戚下手。隔天就听到電話,其兄沒修道，目前已送医急救。", "en": "They replied, “Not you—it’s your ancestors. But since you cultivate Tao, we cannot touch you. We will go after your relatives instead.” The next day, he received a call—his brother (who did not cultivate) was in emergency care.", "divider": false},
+    {"zh": "坛主立刻上呈了愿財施、一半其兄之名，半自己之名，更認真修道。", "en": "He immediately made offerings and vows, dedicating merit partly for his brother and partly for himself, and became more diligent in cultivation.", "divider": false},
+    {"zh": "收起得过且过的心，積極親近道親，講說渡世!", "en": "Do not live carelessly. Stay close to fellow practitioners and help guide others.", "divider": false},
+    {"zh": "主题:風雨中的寧靜。二畫家畫出此意境、", "en": "Two painters illustrated this: ", "divider": false},
+    {"zh": "Ａ畫中，遠山之間有湖泊，湖面無波，有蝶靜飛。此產乃静中之靜，非真寧靜，實乃停滞。", "en": "Painting A: A quiet lake, still water, butterflies flying<br> → This is “stillness in stillness,” but not true peace—it is just stagnation ", "divider": false},
+    {"zh": "Ｂ畫中，有奔腾的流水瀑布、旁有樹枝。枝上有鳥巢，几乎被水浸湿，汲汲可危。 巢中有小知更鳥、視之甚危，却见小鳥安詳睡著。", "en": "Painting B: A rushing waterfall, a fragile nest on a branch, almost swept away → Inside the nest, a small bird sleeps peacefully.", "divider": false},
+    {"zh": "观者言Ｂ畫才日寧靜，乃動中之靜，是謂真靜。", "en": "Viewers said Painting B shows true peace—calmness within movement.", "divider": false},
+    {"zh": "在此动盪勢局之中，吾心可寧靜?.外在誘惑可迷人乎?影响吾輩深巨嗎? 貪困不是錢不夠，是我們的心觉得不满足，被这個感觉没钱的執着困住了。", "en": "In this chaotic world: Can our hearts remain calm? Are we easily tempted by external things? Greed is not about lacking money—it is the feeling of never being satisfied. ", "divider": false},
+    {"zh": "重點1：要学会一個“静”字,下手功夫,從 “淡字”開始,不只要靜中能靜.", "en": "Key Point 1:<br> Learn the word “calm (stillness).” Begin your practice from the word “detachment (lightness).” It is not enough to be calm only in stillness.", "divider": false},
+    {"zh": "更还要動中能靜。如果你是百物不思， 緊閉六根，充其量也只不過是個靜中 静的高手(如古代坐禅)豈能入世而不染?", "en": "You must also be calm amidst movement. If you think of nothing and shut off the six senses, at most you are only skilled at being calm in stillness (like ancient meditation). How can you enter the world and remain unstained?", "divider": false},
+    {"zh": "集中精神去學習修，不受影响，不好奇，無雜思，極靜不動心。", "en": "Focus your mind on learning and cultivating. Do not be influenced, do not be curious, have no distracting thoughts—remain completely calm and unmoved.", "divider": false},
+    {"zh": "重點2：更在動中能靜.目前全左界萬教齊發，我們要靜得下来，不要易受影响，如此才叫動中能靜。", "en": "Key Point 2: More importantly, be calm within movement. At present, many teachings and influences are arising everywhere. We must be able to settle our minds and not be easily influenced. Only then can it be called true calm within movement. ", "divider": false},
+    {"zh": "結語:以上是周道如砥.....", "en": "Conclusion: The right path is straight and steady… ", "divider": false},
+    {"zh": "之君子實行此道，自能保守人格、资格、性格之道也，亦是咱們不可不知，不可不行之路徑也。(人有良知良能，可以保守,要修身修心)", "en": "A noble person practices this path and preserves character, integrity and true nature. This is a path we must understand and follow. Humans have conscience and ability—we must preserve and cultivate them. ", "divider": false},
+    {"zh": "故我們有人格，神格堅格可期。 一旦不修，此格即破变破格，走四生去流浪。 完全在每個人的抉擇、理智往前走,提振精神代天宣化，替天行道吧!)。", "en": "If we cultivate well, we develop human virtue, spiritual dignity, and strong character. If we do not, we lose these qualities and fall into confusion and suffering. Everything depends on each person’s choices and wisdom. So we should uplift ourselves, follow Heaven’s will, and walk the path of righteousness.", "divider": false}
+];
+var zhEl = document.getElementById('player-zh');
+var enEl = document.getElementById('player-en');
+var numEl = document.getElementById('player-num');
+var idx = 0;
+var playing = true;
+var autoTimer = null;
+
+var isTitle = false;
+var isDivider = false;
+
+const channel = new BroadcastChannel('chunwan2026-sync-v4');
+
+function show() {
+  var s = slides[idx];
+  isTitle = (idx === 0);
+  isDivider = s.divider;
+  if (isTitle) {
+    zhEl.innerHTML = '<div class="title-bg"><div class="t-year">歲次丙午年</div><div class="t-main">'+s.zh+'</div></div>';
+    enEl.innerHTML = '';
+  } else if (isDivider) {
+    zhEl.innerHTML = '<div class="divider-bg"><div class="d-title">'+s.zh+'</div></div>';
+    enEl.innerHTML = '';
+  } else {
+    zhEl.innerHTML = '<div class="zh-main">'+s.zh+'</div>';
+    enEl.innerHTML = s.en ? '<div class="en-text">'+s.en+'</div>' : '';
+  }
+  numEl.textContent = (idx+1) + ' / ' + slides.length;
+}
+
+function startAuto() {
+  stopAuto();
+  autoTimer = setInterval(function() {
+    if (playing && idx < slides.length - 1) { idx++; show(); }
+  }, 5000);
+}
+
+function stopAuto() { if (autoTimer) { clearInterval(autoTimer); autoTimer = null; } }
+
+channel.addEventListener('message', function(e) {
+  var d = e.data;
+  if (d.action === 'start') { show(); }
+  if (d.action === 'sync') {
+    idx = d.index;
+    playing = d.playing;
+    show();
+    if (playing) startAuto(); else stopAuto();
+  }
+  if (d.action === 'togglePlay') {
+    playing = d.playing;
+    if (playing) startAuto(); else stopAuto();
+  }
+});
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'ArrowRight' || e.key === ' ') { idx = Math.min(slides.length-1, idx+1); show(); }
+  if (e.key === 'ArrowLeft') { idx = Math.max(0, idx-1); show(); }
+});
+
+show();
+</script>
+</body>
+</html>
